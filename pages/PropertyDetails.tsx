@@ -1,15 +1,49 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart } from 'lucide-react';
-import { PROPERTIES } from '../constants';
+import { supabase } from '../src/lib/supabase';
+import { Property } from '../types';
 
 const PropertyDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
-    const property = PROPERTIES.find(p => p.id === id);
+    const [property, setProperty] = React.useState<Property | null>(null);
+    const [loading, setLoading] = React.useState(true);
+    const [error, setError] = React.useState<string | null>(null);
 
     useEffect(() => {
         window.scrollTo(0, 0);
+        const fetchProperty = async () => {
+            if (!id) return;
+            try {
+                const { data, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .eq('id', id)
+                    .single();
+
+                if (error) throw error;
+
+                if (data) {
+                    setProperty(data as Property);
+                }
+            } catch (err) {
+                console.error('Error fetching property:', err);
+                setError('Imóvel não encontrado ou erro ao carregar.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProperty();
     }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-pearl">
+                <div className="text-navy font-serif text-xl animate-pulse">Carregando detalhes do imóvel...</div>
+            </div>
+        );
+    }
 
     if (!property) {
         return (
