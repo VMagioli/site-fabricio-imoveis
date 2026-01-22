@@ -10,6 +10,11 @@ export interface Property {
   image: string;
   type: 'Comprar' | 'Alugar';
   category: 'Apartamento' | 'Cobertura' | 'Casa' | 'Terreno';
+  suites?: number;
+  parking?: number;
+  land_area?: number;
+  built_area?: number;
+  pet_friendly?: boolean;
 }
 
 export interface NavLink {

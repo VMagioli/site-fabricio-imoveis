@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart } from 'lucide-react';
+import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 
@@ -119,22 +119,59 @@ const PropertyDetails: React.FC = () => {
                         {/* Key Info */}
                         <div className="bg-white p-8 md:p-12 rounded-sm shadow-sm border border-gray-100">
                             <h3 className="font-serif text-2xl text-navy mb-8">Características Principais</h3>
-                            <div className="grid grid-cols-3 gap-8 border-b border-gray-100 pb-8 mb-8">
+                            <div className="grid grid-cols-3 md:grid-cols-6 gap-8 border-b border-gray-100 pb-8 mb-8">
                                 <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
-                                    <BedDouble size={32} className="text-gold mb-3" />
-                                    <span className="text-2xl font-serif text-navy mb-1">{property.beds}</span>
-                                    <span className="text-xs uppercase tracking-widest text-gray-500">Quartos</span>
+                                    <BedDouble size={24} className="text-gold mb-3" />
+                                    <span className="text-xl font-serif text-navy mb-1">{property.beds}</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-500">Quartos</span>
                                 </div>
                                 <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
-                                    <Bath size={32} className="text-gold mb-3" />
-                                    <span className="text-2xl font-serif text-navy mb-1">{property.baths}</span>
-                                    <span className="text-xs uppercase tracking-widest text-gray-500">Banheiros</span>
+                                    <Bath size={24} className="text-gold mb-3" />
+                                    <span className="text-xl font-serif text-navy mb-1">{property.baths}</span>
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-500">Banheiros</span>
                                 </div>
-                                <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
-                                    <Square size={32} className="text-gold mb-3" />
-                                    <span className="text-2xl font-serif text-navy mb-1">{property.area}</span>
-                                    <span className="text-xs uppercase tracking-widest text-gray-500">Área Total</span>
-                                </div>
+                                {property.suites && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <BedDouble size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">{property.suites}</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Suítes</span>
+                                    </div>
+                                )}
+                                {property.parking && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <CarFront size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">{property.parking}</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Vagas</span>
+                                    </div>
+                                )}
+                                {property.area && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <Square size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">{property.area}</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Área Total</span>
+                                    </div>
+                                )}
+                                {property.built_area && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <Ruler size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">{property.built_area}m²</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Área Const.</span>
+                                    </div>
+                                )}
+                                {property.land_area && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <MapPin size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">{property.land_area}m²</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Terreno</span>
+                                    </div>
+                                )}
+                                {property.pet_friendly && (
+                                    <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
+                                        <PawPrint size={24} className="text-gold mb-3" />
+                                        <span className="text-xl font-serif text-navy mb-1">Sim</span>
+                                        <span className="text-[10px] uppercase tracking-widest text-gray-500">Aceita Pet</span>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="space-y-6 text-gray-600 leading-relaxed font-light">
@@ -195,8 +232,8 @@ const PropertyDetails: React.FC = () => {
 
                             <div className="mt-8 pt-8 border-t border-gray-100 text-center">
                                 <p className="text-xs text-gray-400 mb-2">Ou fale diretamente conosco</p>
-                                <a href="https://wa.me/5521999999999" className="text-gold font-bold hover:underline text-sm">
-                                    (21) 99999-9999
+                                <a href="https://wa.me/5521990132992" className="text-gold font-bold hover:underline text-sm">
+                                    (21) 99013-2992
                                 </a>
                             </div>
                         </div>

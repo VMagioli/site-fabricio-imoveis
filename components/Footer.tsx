@@ -12,7 +12,7 @@ const Footer: React.FC = () => {
 
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 mb-20">
-          
+
           {/* Branding */}
           <div className="lg:col-span-1">
             <div className="flex flex-col mb-8">
@@ -60,7 +60,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-4">
                 <Phone className="text-gold flex-shrink-0" size={18} />
-                <span>+55 21 99999-9999</span>
+                <span>+55 21 99013-2992</span>
               </li>
               <li className="flex items-center gap-4">
                 <Mail className="text-gold flex-shrink-0" size={18} />
@@ -74,9 +74,9 @@ const Footer: React.FC = () => {
             <h4 className="font-serif text-xl text-gold mb-8 italic">News Exclusiva</h4>
             <p className="text-sm text-pearl/60 mb-6 font-light">Receba lançamentos e oportunidades off-market.</p>
             <div className="flex">
-              <input 
-                type="email" 
-                placeholder="Seu melhor e-mail" 
+              <input
+                type="email"
+                placeholder="Seu melhor e-mail"
                 className="bg-white/5 border border-white/10 py-3 px-4 rounded-l-sm w-full outline-none focus:border-gold transition-colors text-sm"
               />
               <button className="bg-gold text-navy px-4 rounded-r-sm font-bold hover:bg-gold/80 transition-colors">
@@ -91,8 +91,8 @@ const Footer: React.FC = () => {
           <div className="text-[10px] text-pearl/30 uppercase tracking-widest text-center md:text-left">
             © 2024 Fabrício Magioli. Todos os direitos reservados. | CRECI-RJ 00.000-F
           </div>
-          
-          <button 
+
+          <button
             onClick={scrollToTop}
             className="group flex flex-col items-center gap-2"
           >

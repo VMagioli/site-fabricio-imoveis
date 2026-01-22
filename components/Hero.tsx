@@ -6,7 +6,7 @@ const Hero: React.FC = () => {
   return (
     <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
       {/* Background with Overlay */}
-      <div 
+      <div
         className="absolute inset-0 z-0 bg-cover bg-center transition-transform duration-[10s] scale-105 hover:scale-100"
         style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=2000")' }}
       >
@@ -24,16 +24,13 @@ const Hero: React.FC = () => {
             <span className="italic">ideal</span> no Rio de Janeiro
           </h1>
           <p className="text-pearl/80 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto opacity-0 animate-[fadeInUp_1s_ease_0.6s_forwards]">
-            Curadoria exclusiva dos endereços mais desejados do Leblon ao Jardim Botânico. 
+            Curadoria exclusiva dos endereços mais desejados do Leblon ao Jardim Botânico.
             Onde a sofisticação encontra o estilo de vida carioca.
           </p>
-          
+
           <div className="flex flex-col md:flex-row gap-4 justify-center opacity-0 animate-[fadeInUp_1s_ease_0.9s_forwards]">
             <a href="#imoveis" className="bg-gold hover:bg-gold/80 text-navy font-bold py-4 px-10 rounded-sm transition-all transform hover:scale-105 uppercase tracking-wider">
               Ver Portfólio
-            </a>
-            <a href="#contato" className="glass hover:bg-white/10 text-white font-bold py-4 px-10 rounded-sm transition-all uppercase tracking-wider">
-              Consultoria Gratuita
             </a>
           </div>
         </div>

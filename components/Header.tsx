@@ -28,7 +28,7 @@ const Header: React.FC = () => {
             Fabrício <span className="text-gold">Magioli</span>
           </span>
           <span className="text-[10px] text-pearl/60 tracking-[0.2em] font-light uppercase">
-            Luxury Real Estate Specialist
+            Imóveis e Oportunidades
           </span>
         </Link>
 

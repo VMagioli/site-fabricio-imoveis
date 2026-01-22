@@ -10,7 +10,7 @@ const Home: React.FC = () => {
       <Hero />
       <QuickSearch />
       <PropertyGrid />
-      
+
       {/* Experience Banner */}
       <section className="bg-navy py-20 relative overflow-hidden">
         <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
@@ -42,25 +42,33 @@ const Home: React.FC = () => {
       <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="bg-navy rounded-sm p-12 md:p-20 relative overflow-hidden flex flex-col items-center text-center">
-             <div className="absolute top-0 left-0 w-full h-1 bg-gold"></div>
-             <div className="max-w-3xl">
-               <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs mb-6 block">Consultoria Premium</span>
-               <h2 className="font-serif text-4xl md:text-6xl text-white mb-10 leading-tight">
-                 Pronto para o seu <br />
-                 próximo <span className="italic text-gold">grande capítulo</span>?
-               </h2>
-               <p className="text-pearl/60 text-lg mb-12 font-light">
-                 Deixe seu contato para uma reunião estratégica e descubra as melhores oportunidades off-market do Rio de Janeiro.
-               </p>
-               <div className="flex flex-col md:flex-row gap-6 justify-center">
-                 <button className="bg-gold hover:bg-gold/80 text-navy font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 uppercase tracking-widest text-sm shadow-xl">
-                   Entrar em Contato Agora
-                 </button>
-                 <button className="border border-white/20 hover:bg-white/5 text-white font-bold py-5 px-12 rounded-sm transition-all uppercase tracking-widest text-sm">
-                   Ver Novos Lançamentos
-                 </button>
-               </div>
-             </div>
+            <div className="absolute top-0 left-0 w-full h-1 bg-gold"></div>
+            <div className="max-w-3xl">
+              <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs mb-6 block">Consultoria Premium</span>
+              <h2 className="font-serif text-4xl md:text-6xl text-white mb-10 leading-tight">
+                Pronto para o seu <br />
+                próximo <span className="italic text-gold">grande capítulo</span>?
+              </h2>
+              <p className="text-pearl/60 text-lg mb-12 font-light">
+                Deixe seu contato para uma reunião estratégica e descubra as melhores oportunidades off-market do Rio de Janeiro.
+              </p>
+              <div className="flex flex-col md:flex-row gap-6 justify-center">
+                <a
+                  href="https://wa.me/5521990132992"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-gold hover:bg-gold/80 text-navy font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 uppercase tracking-widest text-sm shadow-xl inline-flex items-center justify-center"
+                >
+                  Entrar em Contato Agora
+                </a>
+                <a
+                  href="/imoveis"
+                  className="border border-white/20 hover:bg-white/5 text-white font-bold py-5 px-12 rounded-sm transition-all uppercase tracking-widest text-sm inline-flex items-center justify-center text-center"
+                >
+                  Ver Novos Lançamentos
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </section>

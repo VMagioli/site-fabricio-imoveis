@@ -92,7 +92,7 @@ const PropertyGrid: React.FC = () => {
   return (
     <section id="imoveis" className="py-24 bg-pearl">
       <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16">
           <div className="max-w-xl">
             <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Portfólio Selecionado</span>
             <h2 className="font-serif text-4xl md:text-5xl text-navy">Imóveis em Destaque</h2>

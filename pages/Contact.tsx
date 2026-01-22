@@ -15,7 +15,7 @@ const Contact: React.FC = () => {
     const onSubmit = (data: ContactFormData) => {
         const text = `Olá, meu nome é ${data.name}. ${data.message}. Meu contato: ${data.phone}, ${data.email}`;
         const encodedText = encodeURIComponent(text);
-        const whatsappUrl = `https://wa.me/5521999999999?text=${encodedText}`;
+        const whatsappUrl = `https://wa.me/5521990132992?text=${encodedText}`;
         window.open(whatsappUrl, '_blank');
     };
 
@@ -101,7 +101,7 @@ const Contact: React.FC = () => {
                             </p>
                             <p className="flex items-center gap-3 text-navy">
                                 <MessageCircle size={18} className="text-gold" />
-                                <span>(21) 99999-9999</span>
+                                <span>(21) 99013-2992</span>
                             </p>
                             <p className="flex items-center gap-3 text-navy">
                                 <Mail size={18} className="text-gold" />
