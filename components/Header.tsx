@@ -44,13 +44,13 @@ const Header: React.FC = () => {
             </Link>
           ))}
           <a
-            href="https://wa.me/5521999999999"
+            href="https://wa.me/5521990132992"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-gold hover:bg-gold/80 text-navy font-bold py-3 px-6 rounded-sm transition-all shadow-lg text-sm uppercase tracking-tighter"
           >
             <MessageCircle size={18} />
-            Fale no WhatsApp
+            Fale comigo
           </a>
         </nav>
 
@@ -78,7 +78,7 @@ const Header: React.FC = () => {
             </Link>
           ))}
           <a
-            href="https://wa.me/5521999999999"
+            href="https://wa.me/5521990132992"
             className="flex items-center justify-center gap-2 bg-gold text-navy font-bold py-4 rounded-sm"
           >
             <MessageCircle size={20} />

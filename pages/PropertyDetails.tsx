@@ -3,12 +3,30 @@ import { useParams, Link } from 'react-router-dom';
 import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
+import { z } from 'zod';
+
+const visitSchema = z.object({
+    name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+    contact: z.string().min(10, 'Contato (Email ou Telefone) deve ter no mínimo 10 caracteres'),
+    message: z.string().optional(),
+    check_visit: z.string().optional()
+});
 
 const PropertyDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const [property, setProperty] = React.useState<Property | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
+
+    // Form State
+    const [formData, setFormData] = React.useState({
+        name: '',
+        contact: '',
+        message: '',
+        check_visit: ''
+    });
+    const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -36,6 +54,91 @@ const PropertyDetails: React.FC = () => {
 
         fetchProperty();
     }, [id]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+        // Clear error when user types
+        if (fieldErrors[name]) {
+            setFieldErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // 1. Honeypot Check
+        if (formData.check_visit) {
+            console.log('Bot detected');
+            setIsSubmitting(true);
+            setTimeout(() => {
+                setIsSubmitting(false);
+                // Fake success or just do nothing
+            }, 1000);
+            return;
+        }
+
+        // 2. Validation
+        const result = visitSchema.safeParse(formData);
+
+        if (!result.success) {
+            const formattedErrors: Record<string, string> = {};
+            result.error.issues.forEach(issue => {
+                const path = issue.path[0] as string;
+                formattedErrors[path] = issue.message;
+            });
+            setFieldErrors(formattedErrors);
+            return;
+        }
+
+        // 3. Save to Supabase & Redirect
+        setIsSubmitting(true);
+
+        // Construct Property Ref String
+        const propertyRef = `ID ${property?.id || 'N/A'} - ${property?.title || 'Unknown'}`;
+
+        try {
+            const { error: dbError } = await supabase
+                .from('leads')
+                .insert([
+                    {
+                        name: formData.name,
+                        contact: formData.contact,
+                        message: formData.message,
+                        property_ref: propertyRef
+                    }
+                ]);
+
+            if (dbError) console.error('Erro ao salvar lead:', dbError);
+            else console.log('Lead salvo com sucesso');
+        } catch (err) {
+            console.error('Erro inesperado ao salvar lead:', err);
+        }
+
+        // Construct Message
+        // 'Olá, tenho interesse no imóvel [Título do Imóvel] (Ref: [ID]). Gostaria de agendar uma visita.'
+        let text = `Olá, tenho interesse no imóvel ${property?.title} (Ref: ${property?.id}). Gostaria de agendar uma visita.`;
+
+        // Append user message if exists
+        if (formData.message) {
+            text += `\n\nMensagem: ${formData.message}`;
+        }
+
+        const encodedText = encodeURIComponent(text);
+        const whatsappUrl = `https://wa.me/5521990132992?text=${encodedText}`;
+
+        // Simulate delay for "Enviando..." feedback
+        setTimeout(() => {
+            alert('Solicitação recebida com sucesso! Redirecionando para o WhatsApp...');
+            window.open(whatsappUrl, '_blank');
+            setIsSubmitting(false);
+            setFormData({ name: '', contact: '', message: '', check_visit: '' }); // Reset form
+        }, 1500);
+    };
 
     if (loading) {
         return (
@@ -209,24 +312,62 @@ const PropertyDetails: React.FC = () => {
                                 <h3 className="font-serif text-2xl text-navy">Agende uma Visita</h3>
                             </div>
 
-                            <form className="space-y-5">
+                            <form onSubmit={handleSubmit} className="space-y-5">
                                 <div>
                                     <label className="block text-xs font-bold text-navy uppercase tracking-wide mb-2">Nome Completo</label>
-                                    <input type="text" className="w-full bg-pearl/30 border border-gray-200 p-3 text-sm focus:outline-none focus:border-gold transition-colors rounded-sm" placeholder="Seu nome" />
+                                    <input
+                                        type="text"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        className={`w-full bg-pearl/30 border p-3 text-sm focus:outline-none transition-colors rounded-sm ${fieldErrors.name ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gold'}`}
+                                        placeholder="Seu nome"
+                                        disabled={isSubmitting}
+                                    />
+                                    {fieldErrors.name && <p className="text-red-500 text-xs mt-1">{fieldErrors.name}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-navy uppercase tracking-wide mb-2">Email / Telefone</label>
-                                    <input type="text" className="w-full bg-pearl/30 border border-gray-200 p-3 text-sm focus:outline-none focus:border-gold transition-colors rounded-sm" placeholder="Seu contato" />
+                                    <input
+                                        type="text"
+                                        name="contact"
+                                        value={formData.contact}
+                                        onChange={handleInputChange}
+                                        className={`w-full bg-pearl/30 border p-3 text-sm focus:outline-none transition-colors rounded-sm ${fieldErrors.contact ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gold'}`}
+                                        placeholder="Seu contato"
+                                        disabled={isSubmitting}
+                                    />
+                                    {fieldErrors.contact && <p className="text-red-500 text-xs mt-1">{fieldErrors.contact}</p>}
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-navy uppercase tracking-wide mb-2">Mensagem</label>
                                     <textarea
+                                        name="message"
+                                        value={formData.message}
+                                        onChange={handleInputChange}
                                         className="w-full bg-pearl/30 border border-gray-200 p-3 text-sm focus:outline-none focus:border-gold transition-colors rounded-sm h-32 resize-none"
-                                        defaultValue={`Olá, tenho interesse no imóvel "${property.title}" (ID: ${property.id}). Gostaria de mais informações.`}
+                                        placeholder="Se tiver alguma dúvida específica..."
+                                        disabled={isSubmitting}
                                     ></textarea>
                                 </div>
-                                <button className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-4 rounded-sm transition-all uppercase tracking-widest text-xs shadow-lg transform hover:-translate-y-1">
-                                    Enviar Solicitação
+
+                                {/* Honeypot Field */}
+                                <input
+                                    type="text"
+                                    name="check_visit"
+                                    value={formData.check_visit}
+                                    onChange={handleInputChange}
+                                    className="opacity-0 absolute -z-10 w-0 h-0"
+                                    tabIndex={-1}
+                                    autoComplete="off"
+                                />
+
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-4 rounded-sm transition-all uppercase tracking-widest text-xs shadow-lg transform hover:-translate-y-1 disabled:opacity-70 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
+                                >
+                                    {isSubmitting ? 'Enviando...' : 'Enviar Solicitação'}
                                 </button>
                             </form>
 

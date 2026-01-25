@@ -17,20 +17,20 @@ const Hero: React.FC = () => {
       <div className="container mx-auto px-6 relative z-10 text-center">
         <div className="max-w-4xl mx-auto">
           <span className="inline-block text-gold font-medium tracking-[0.4em] uppercase text-xs md:text-sm mb-6 opacity-0 animate-[fadeInUp_1s_ease_forwards]">
-            Experiência & Exclusividade no Rio de Janeiro
+            O sonho da casa própria ao seu alcance
           </span>
           <h1 className="font-serif text-4xl md:text-7xl text-white leading-tight mb-8 opacity-0 animate-[fadeInUp_1s_ease_0.3s_forwards]">
             Encontre seu imóvel <br />
             <span className="italic">ideal</span> no Rio de Janeiro
           </h1>
           <p className="text-pearl/80 text-lg md:text-xl font-light mb-12 max-w-2xl mx-auto opacity-0 animate-[fadeInUp_1s_ease_0.6s_forwards]">
-            Curadoria exclusiva dos endereços mais desejados do Leblon ao Jardim Botânico.
-            Onde a sofisticação encontra o estilo de vida carioca.
+            Compre seu imóvel certo no Rio, com orientação de quem conhece o mercado.
+            Assessoria imobiliária para compra do imóvel que realmente faz sentido para o seu momento.
           </p>
 
           <div className="flex flex-col md:flex-row gap-4 justify-center opacity-0 animate-[fadeInUp_1s_ease_0.9s_forwards]">
             <a href="#imoveis" className="bg-gold hover:bg-gold/80 text-navy font-bold py-4 px-10 rounded-sm transition-all transform hover:scale-105 uppercase tracking-wider">
-              Ver Portfólio
+              Confira as Oportunidades
             </a>
           </div>
         </div>

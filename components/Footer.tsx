@@ -1,9 +1,50 @@
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { z } from 'zod';
+import { supabase } from '../src/lib/supabase';
+import { Instagram, Facebook, MapPin, Phone, Mail, ArrowUp, Check, Loader2 } from 'lucide-react';
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-import React from 'react';
-import { Instagram, Linkedin, Facebook, MapPin, Phone, Mail, ArrowUp } from 'lucide-react';
+const newsletterSchema = z.string().email("Por favor, insira um e-mail válido.");
 
-const Footer: React.FC = () => {
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [cidadeCheck, setCidadeCheck] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  const handleSubscribe = async () => {
+    // Honeypot check
+    if (cidadeCheck) {
+      console.log('Bot detected');
+      setStatus('success');
+      setTimeout(() => setStatus('idle'), 3000);
+      return;
+    }
+
+    const result = newsletterSchema.safeParse(email);
+    if (!result.success) {
+      alert(result.error.issues[0].message);
+      return;
+    }
+
+    setStatus('loading');
+
+    try {
+      const { error } = await supabase
+        .from('newsletter')
+        .insert([{ email }]);
+
+      if (error) throw error;
+
+      setStatus('success');
+      setEmail('');
+      setTimeout(() => setStatus('idle'), 3000);
+    } catch (error) {
+      console.error('Erro ao cadastrar:', error);
+      alert('Ocorreu um erro ao cadastrar. Tente novamente.');
+      setStatus('error');
+    }
+  };
 
   return (
     <footer id="contato" className="bg-navy text-white pt-24 pb-12 relative overflow-hidden">
@@ -20,18 +61,15 @@ const Footer: React.FC = () => {
                 Fabrício <span className="text-gold">Magioli</span>
               </span>
               <span className="text-[10px] text-pearl/60 tracking-[0.2em] font-light uppercase">
-                Luxury Real Estate Specialist
+                Imóveis e Oportunidades
               </span>
             </div>
             <p className="text-pearl/50 text-sm leading-relaxed mb-8 font-light">
-              Especialista em realizar sonhos e consolidar patrimônios através da curadoria imobiliária de luxo no Rio de Janeiro.
+              Especialista em conectar pessoas às melhores oportunidades do mercado imobiliário carioca, com atendimento próximo, visão estratégica e uma curadoria comprometida com o que realmente importa: o seu próximo lar.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
                 <Instagram size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
-                <Linkedin size={18} />
               </a>
               <a href="#" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
                 <Facebook size={18} />
@@ -39,32 +77,29 @@ const Footer: React.FC = () => {
             </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Links Rápidos */}
           <div>
             <h4 className="font-serif text-xl text-gold mb-8 italic">Links Rápidos</h4>
             <ul className="space-y-4 text-sm font-light text-pearl/60">
-              <li><a href="#" className="hover:text-gold transition-colors">Início</a></li>
-              <li><a href="#imoveis" className="hover:text-gold transition-colors">Portfólio de Imóveis</a></li>
-              <li><a href="#sobre" className="hover:text-gold transition-colors">Trajetória Profissional</a></li>
-              <li><a href="#" className="hover:text-gold transition-colors">Política de Privacidade</a></li>
+              <li><Link to="/" className="hover:text-gold transition-colors">Início</Link></li>
+              <li><Link to="/imoveis" className="hover:text-gold transition-colors">Portfólio de Imóveis</Link></li>
+              <li><a href="/#sobre" className="hover:text-gold transition-colors">Sobre</a></li>
+              <li><Link to="/contato" className="hover:text-gold transition-colors">Contato</Link></li>
+              <li><Link to="/politica-de-privacidade" className="hover:text-gold transition-colors">Política de Privacidade</Link></li>
             </ul>
           </div>
 
-          {/* Location */}
+          {/* Atendimento */}
           <div>
             <h4 className="font-serif text-xl text-gold mb-8 italic">Atendimento</h4>
             <ul className="space-y-6 text-sm font-light text-pearl/60">
-              <li className="flex items-start gap-4">
-                <MapPin className="text-gold mt-1 flex-shrink-0" size={18} />
-                <span>Av. Afrânio de Melo Franco, 290<br />Leblon, Rio de Janeiro - RJ</span>
-              </li>
               <li className="flex items-center gap-4">
                 <Phone className="text-gold flex-shrink-0" size={18} />
                 <span>+55 21 99013-2992</span>
               </li>
               <li className="flex items-center gap-4">
                 <Mail className="text-gold flex-shrink-0" size={18} />
-                <span>contato@fabriciomagioli.com.br</span>
+                <span>magiolifabricio@gmail.com</span>
               </li>
             </ul>
           </div>
@@ -77,19 +112,45 @@ const Footer: React.FC = () => {
               <input
                 type="email"
                 placeholder="Seu melhor e-mail"
-                className="bg-white/5 border border-white/10 py-3 px-4 rounded-l-sm w-full outline-none focus:border-gold transition-colors text-sm"
+                className="bg-white/5 border border-white/10 py-3 px-4 rounded-l-sm w-full outline-none focus:border-gold transition-colors text-sm disabled:opacity-50"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={status === 'loading' || status === 'success'}
               />
-              <button className="bg-gold text-navy px-4 rounded-r-sm font-bold hover:bg-gold/80 transition-colors">
-                OK
+              {/* Honeypot Field */}
+              <input
+                type="text"
+                name="cidade_check" // Generic name
+                value={cidadeCheck}
+                onChange={(e) => setCidadeCheck(e.target.value)}
+                className="absolute opacity-0 -z-10 w-0 h-0"
+                tabIndex={-1}
+                autoComplete="off"
+              />
+              <button
+                onClick={handleSubscribe}
+                disabled={status === 'loading' || status === 'success'}
+                className={`bg-gold text-navy px-4 rounded-r-sm font-bold hover:bg-gold/80 transition-colors disabled:opacity-80 min-w-[60px] flex items-center justify-center`}
+              >
+                {status === 'loading' ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : status === 'success' ? (
+                  <Check size={18} />
+                ) : (
+                  'OK'
+                )}
               </button>
             </div>
+            {status === 'success' && (
+              <p className="text-gold text-xs mt-2 font-light">Cadastrado com sucesso!</p>
+            )}
           </div>
         </div>
 
         {/* Bottom Bar */}
         <div className="border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="text-[10px] text-pearl/30 uppercase tracking-widest text-center md:text-left">
-            © 2024 Fabrício Magioli. Todos os direitos reservados. | CRECI-RJ 00.000-F
+            © 2026 Fabrício Magioli. Todos os direitos reservados. | CRECI-RJ 106924
           </div>
 
           <button

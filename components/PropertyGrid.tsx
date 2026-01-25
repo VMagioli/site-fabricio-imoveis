@@ -48,7 +48,7 @@ const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
 
       <div className="flex justify-between items-center">
         <div>
-          <span className="text-[10px] text-dark/50 uppercase tracking-widest block">Valor sugerido</span>
+          <span className="text-[10px] text-dark/50 uppercase tracking-widest block">Valor</span>
           <span className="text-xl font-bold text-gold">{property.price}</span>
         </div>
         <Link to={`/imovel/${property.id}`} className="text-navy hover:text-gold transition-colors flex items-center gap-2 group/btn">
@@ -106,7 +106,7 @@ const PropertyGrid: React.FC = () => {
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="text-navy font-serif text-xl animate-pulse">Carregando imóveis exclusivos...</div>
+            <div className="text-navy font-serif text-xl animate-pulse">Carregando imóveis...</div>
           </div>
         ) : error ? (
           <div className="text-center py-10 text-red-500">{error}</div>

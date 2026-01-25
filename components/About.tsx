@@ -24,7 +24,7 @@ const About: React.FC = () => {
             <div className="absolute bottom-6 -right-4 lg:-right-8 bg-navy p-6 md:p-8 shadow-2xl z-20 max-w-[300px]">
               <Quote className="text-gold mb-4" size={32} />
               <p className="text-white italic font-light text-sm leading-relaxed">
-                "Minha missão é transformar a busca pelo imóvel ideal em uma experiência de absoluta segurança e sofisticação."
+                "Minha missão é ajudar você a sair do aluguel e conquistar o seu lar com segurança, confiança e as melhores condições."
               </p>
             </div>
           </div>
@@ -34,11 +34,14 @@ const About: React.FC = () => {
             <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs mb-4 block">Expertise Carioca</span>
             <h2 className="font-serif text-4xl md:text-5xl text-navy mb-8 leading-tight">
               Fabrício Magioli: <br />
-              <span className="italic">Confiança e Discrição</span>
+              <span className="italic">Compromisso com o seu sonho</span>
             </h2>
             
             <p className="text-dark/70 text-lg mb-8 leading-relaxed font-light">
-              Com mais de 15 anos de atuação exclusiva no mercado de alto padrão, Fabrício consolidou-se como referência para investidores e famílias que buscam não apenas um imóvel, mas um patrimônio sólido nas áreas mais nobres do Rio de Janeiro.
+              Comprar um imóvel é mais do que uma transação: é um passo de vida. E é por isso que atuo com verdade, presença e comprometimento em cada atendimento. Eu sei que, para muitas famílias, essa decisão representa a realização de um sonho e o início de um novo capítulo.<br />
+              <br />Com um atendimento próximo, transparente e focado no que realmente importa, ajudo quem buscam sair do aluguel, conquistar sua independência ou encontrar um novo lar para a família crescer.<br />
+              <br />Meu trabalho é te guiar com clareza, segurança e respeito ao orçamento, buscando sempre as melhores oportunidades do mercado.
+
             </p>
 
             <div className="space-y-8">
@@ -47,8 +50,7 @@ const About: React.FC = () => {
                   <Award className="text-gold" size={28} />
                 </div>
                 <div>
-                  <h4 className="text-navy font-bold text-lg mb-1 uppercase tracking-tighter">Certificação Internacional</h4>
-                  <p className="text-dark/60 text-sm font-light">Expertise em transações complexas e avaliação imobiliária premium.</p>
+                  <h4 className="text-navy font-bold text-lg mb-1 uppercase tracking-tighter">Especialista na Zona Oeste do Rio de Janeiro</h4>
                 </div>
               </div>
               
@@ -57,18 +59,7 @@ const About: React.FC = () => {
                   <ShieldCheck className="text-gold" size={28} />
                 </div>
                 <div>
-                  <h4 className="text-navy font-bold text-lg mb-1 uppercase tracking-tighter">Segurança Jurídica</h4>
-                  <p className="text-dark/60 text-sm font-light">Acompanhamento completo de documentos para uma compra sem riscos.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-6">
-                <div className="bg-pearl p-4 rounded-sm flex-shrink-0 flex items-center justify-center w-14 h-14">
-                  <Handshake className="text-gold" size={28} />
-                </div>
-                <div>
-                  <h4 className="text-navy font-bold text-lg mb-1 uppercase tracking-tighter">Negociação Estratégica</h4>
-                  <p className="text-dark/60 text-sm font-light">Foco total na obtenção do melhor valor e condições para o cliente.</p>
+                  <h4 className="text-navy font-bold text-lg mb-1 uppercase tracking-tighter">Atendimento consultivo e humanizado</h4>
                 </div>
               </div>
             </div>
@@ -77,7 +68,7 @@ const About: React.FC = () => {
               <div>
                 <span className="text-xs text-dark/40 uppercase tracking-widest font-bold block mb-2">Registro Profissional</span>
                 <div className="inline-block border-b-2 border-gold pb-1">
-                  <span className="text-navy font-bold text-lg tracking-wider">CRECI-RJ 00.000-F</span>
+                  <span className="text-navy font-bold text-lg tracking-wider">CRECI-RJ 106924</span>
                 </div>
               </div>
             </div>

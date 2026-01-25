@@ -11,26 +11,51 @@ const Home: React.FC = () => {
       <QuickSearch />
       <PropertyGrid />
 
-      {/* Experience Banner */}
-      <section className="bg-navy py-20 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
-        <div className="container mx-auto px-6 relative z-10 text-center">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-16">
-            <div className="flex flex-col">
-              <span className="text-4xl md:text-5xl font-serif text-gold mb-2">15+</span>
-              <span className="text-xs text-white/40 uppercase tracking-[0.2em]">Anos de Expertise</span>
+      {/* Infinite Marquee Benefits - Replaces Statistics */}
+      <section className="bg-navy py-12 relative overflow-hidden border-y border-white/5">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+        <div className="relative z-10 w-full overflow-hidden">
+          <div className="flex w-max animate-scroll whitespace-nowrap">
+            {/* Original List */}
+            <div className="flex items-center gap-8 md:gap-16 pr-8 md:pr-16">
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Realize o sonho da casa própria</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 2.000</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Use seu FGTS na entrada</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Financiamento Facilitado</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Subsídio do Governo</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Aprovação Rápida de Crédito</span>
             </div>
-            <div className="flex flex-col">
-              <span className="text-4xl md:text-5xl font-serif text-gold mb-2">R$ 2B+</span>
-              <span className="text-xs text-white/40 uppercase tracking-[0.2em]">VGV Negociado</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-4xl md:text-5xl font-serif text-gold mb-2">500+</span>
-              <span className="text-xs text-white/40 uppercase tracking-[0.2em]">Imóveis no Portfólio</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-4xl md:text-5xl font-serif text-gold mb-2">100%</span>
-              <span className="text-xs text-white/40 uppercase tracking-[0.2em]">Discrição Garantida</span>
+
+            {/* Duplicate List */}
+            <div className="flex items-center gap-8 md:gap-16 pr-8 md:pr-16">
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Realize o sonho da casa própria</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 2.000</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Use seu FGTS na entrada</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Financiamento Facilitado</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Subsídio do Governo</span>
+
+              <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Aprovação Rápida de Crédito</span>
             </div>
           </div>
         </div>
@@ -38,40 +63,7 @@ const Home: React.FC = () => {
 
       <About />
 
-      {/* CTA Section */}
-      <section className="py-24 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="bg-navy rounded-sm p-12 md:p-20 relative overflow-hidden flex flex-col items-center text-center">
-            <div className="absolute top-0 left-0 w-full h-1 bg-gold"></div>
-            <div className="max-w-3xl">
-              <span className="text-gold font-bold tracking-[0.3em] uppercase text-xs mb-6 block">Consultoria Premium</span>
-              <h2 className="font-serif text-4xl md:text-6xl text-white mb-10 leading-tight">
-                Pronto para o seu <br />
-                próximo <span className="italic text-gold">grande capítulo</span>?
-              </h2>
-              <p className="text-pearl/60 text-lg mb-12 font-light">
-                Deixe seu contato para uma reunião estratégica e descubra as melhores oportunidades off-market do Rio de Janeiro.
-              </p>
-              <div className="flex flex-col md:flex-row gap-6 justify-center">
-                <a
-                  href="https://wa.me/5521990132992"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="bg-gold hover:bg-gold/80 text-navy font-bold py-5 px-12 rounded-sm transition-all transform hover:scale-105 uppercase tracking-widest text-sm shadow-xl inline-flex items-center justify-center"
-                >
-                  Entrar em Contato Agora
-                </a>
-                <a
-                  href="/imoveis"
-                  className="border border-white/20 hover:bg-white/5 text-white font-bold py-5 px-12 rounded-sm transition-all uppercase tracking-widest text-sm inline-flex items-center justify-center text-center"
-                >
-                  Ver Novos Lançamentos
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+
     </main>
   );
 };

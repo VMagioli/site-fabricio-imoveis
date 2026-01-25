@@ -9,13 +9,12 @@ const QuickSearch: React.FC = () => {
 
         {/* Category Filter */}
         <div className="w-full md:w-1/3">
-          <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Tipo</label>
+          <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Pretensão</label>
           <div className="relative">
             <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
             <select className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none">
               <option>Apartamento</option>
-              <option>Cobertura</option>
-              <option>Casa de Vila</option>
+              <option>Casa</option>
               <option>Terreno</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
@@ -29,16 +28,16 @@ const QuickSearch: React.FC = () => {
             <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
             <select className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none">
               <option>Todos os Bairros</option>
-              <option>Leblon</option>
-              <option>Ipanema</option>
-              <option>Jardim Botânico</option>
-              <option>Lagoa</option>
+              <option>Campo Grande</option>
+              <option>Bangu</option>
+              <option>Santa Cruz</option>
+              <option>Méier</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
           </div>
         </div>
 
-        {/* Search Action */}
+        {/* Search Pesquisa */}
         <div className="w-full md:w-1/3 pt-4 md:pt-6">
           <button className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-4 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-1">
             <Search size={20} />
