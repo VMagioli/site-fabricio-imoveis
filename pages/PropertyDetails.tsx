@@ -68,6 +68,26 @@ const PropertyDetails: React.FC = () => {
         }
     };
 
+    const handleShare = async () => {
+        if (!property) return;
+        const shareData = {
+            title: property.title,
+            text: 'Dá uma olhada neste imóvel incrível!',
+            url: window.location.href,
+        };
+
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(window.location.href);
+                alert('Link copiado para a área de transferência!');
+            }
+        } catch (err) {
+            console.error('Error sharing:', err);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -121,7 +141,7 @@ const PropertyDetails: React.FC = () => {
 
         // Construct Message
         // 'Olá, tenho interesse no imóvel [Título do Imóvel] (Ref: [ID]). Gostaria de agendar uma visita.'
-        let text = `Olá, tenho interesse no imóvel ${property?.title} (Ref: ${property?.id}). Gostaria de agendar uma visita.`;
+        let text = `Olá, tenho interesse no imóvel ${property?.title}. Gostaria de agendar uma visita.`;
 
         // Append user message if exists
         if (formData.message) {
@@ -201,11 +221,12 @@ const PropertyDetails: React.FC = () => {
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <div className="absolute top-4 right-4 flex gap-2">
-                                    <button className="bg-white/90 p-3 rounded-full hover:bg-gold hover:text-navy transition-colors text-navy shadow-lg">
+                                    <button
+                                        onClick={handleShare}
+                                        className="bg-white/90 p-3 rounded-full hover:bg-gold hover:text-navy transition-colors text-navy shadow-lg"
+                                        title="Compartilhar"
+                                    >
                                         <Share2 size={20} />
-                                    </button>
-                                    <button className="bg-white/90 p-3 rounded-full hover:bg-gold hover:text-navy transition-colors text-navy shadow-lg">
-                                        <Heart size={20} />
                                     </button>
                                 </div>
                             </div>
@@ -372,7 +393,7 @@ const PropertyDetails: React.FC = () => {
                             </form>
 
                             <div className="mt-8 pt-8 border-t border-gray-100 text-center">
-                                <p className="text-xs text-gray-400 mb-2">Ou fale diretamente conosco</p>
+                                <p className="text-xs text-gray-400 mb-2">Ou fale diretamente comigo</p>
                                 <a href="https://wa.me/5521990132992" className="text-gold font-bold hover:underline text-sm">
                                     (21) 99013-2992
                                 </a>
