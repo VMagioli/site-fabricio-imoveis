@@ -68,10 +68,10 @@ const Footer = () => {
               Especialista em conectar pessoas às melhores oportunidades do mercado imobiliário carioca, com atendimento próximo, visão estratégica e uma curadoria comprometida com o que realmente importa: o seu próximo lar.
             </p>
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
+              <a href="https://www.instagram.com/fabriciomagioli/" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
                 <Instagram size={18} />
               </a>
-              <a href="#" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
+              <a href="https://www.facebook.com/fabricio.magioli" className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center hover:bg-gold hover:text-navy transition-all">
                 <Facebook size={18} />
               </a>
             </div>
