@@ -59,7 +59,7 @@ const PrivacyPolicy: React.FC = () => {
                 <p className="mb-4">Adotamos medidas técnicas (como senhas fortes e ambientes protegidos) para proteger seus dados contra acessos não autorizados. Os dados são mantidos pelo tempo necessário para fornecer os serviços solicitados.</p>
                 <h2 className="text-2xl font-serif text-gold mt-8 mb-4">6. Direitos do Titular</h2>
                 <p className="mb-4">
-                    Você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento. Para isso, entre em contato pelo e-mail <a href="mailto:[magioli.fabricio@gmail.com]">magioli.fabricio@gmail.com</a>.
+                    Você tem o direito de acessar, corrigir ou solicitar a exclusão de seus dados pessoais a qualquer momento. Para isso, entre em contato pelo e-mail <a href="mailto:[magiolifabricio@gmail.com]">magiolifabricio@gmail.com</a>.
                 </p>
                 <h2 className="text-2xl font-serif text-gold mt-8 mb-4">Mais informações</h2>
                 <p className="mb-4">
