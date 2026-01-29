@@ -1,8 +1,8 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { MessageCircle, Phone, Mail, MapPin } from 'lucide-react';
-
 import { z } from 'zod';
+import SEO from '../components/SEO';
 
 interface ContactFormData {
     name: string;
@@ -45,6 +45,10 @@ const Contact: React.FC = () => {
 
     return (
         <div className="pt-32 pb-20 container mx-auto px-6 min-h-screen bg-pearl">
+            <SEO
+                title="Fale Conosco | Fabrício Magioli"
+                description="Entre em contato pelo WhatsApp e veja como é fácil comprar seu imóvel. Aprovamos seu crédito com agilidade."
+            />
             <h1 className="text-4xl md:text-5xl font-serif text-navy mb-6">Entre em Contato</h1>
             <p className="text-lg text-gray-600 mb-12 max-w-2xl">
                 Estou pronto para tirar suas dúvidas e te ajudar a dar o próximo passo rumo ao seu novo lar.

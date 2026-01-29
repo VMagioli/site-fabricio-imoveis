@@ -4,6 +4,7 @@ import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFr
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { z } from 'zod';
+import SEO from '../components/SEO';
 
 const visitSchema = z.object({
     name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -181,6 +182,11 @@ const PropertyDetails: React.FC = () => {
 
     return (
         <div className="bg-pearl min-h-screen pb-20">
+            <SEO
+                title={`${property.title} | Fabrício Magioli`}
+                description="Agende sua visita para conhecer este imóvel. Aceitamos financiamento e FGTS. Veja fotos e detalhes aqui."
+                image={property.image}
+            />
             {/* Header / Breadcrumb */}
             <div className="bg-navy pt-32 pb-12">
                 <div className="container mx-auto px-6">

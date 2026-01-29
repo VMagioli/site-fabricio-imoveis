@@ -4,9 +4,15 @@ import QuickSearch from '../components/QuickSearch';
 import PropertyGrid from '../components/PropertyGrid';
 import About from '../components/About';
 
+import SEO from '../components/SEO';
+
 const Home: React.FC = () => {
   return (
     <main>
+      <SEO
+        title="Fabrício Magioli | Imóveis no RJ"
+        description="Saia do aluguel agora! Encontre apartamentos e casas no Rio de Janeiro com financiamento facilitado, uso de FGTS e subsídios do governo."
+      />
       <Hero />
       <QuickSearch />
       <PropertyGrid />

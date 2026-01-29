@@ -3,6 +3,7 @@ import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { Link } from 'react-router-dom';
 import { BedDouble, Bath, Square, ArrowRight, ArrowLeft } from 'lucide-react';
+import SEO from '../components/SEO';
 
 const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
     <div className="group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
@@ -89,6 +90,10 @@ const Properties: React.FC = () => {
 
     return (
         <div className="bg-pearl min-h-screen pt-32 pb-20">
+            <SEO
+                title="Encontre seu Imóvel | Fabrício Magioli"
+                description="Confira nossa seleção de imóveis com as melhores condições de pagamento."
+            />
             <div className="container mx-auto px-6">
                 <div className="mb-12">
                     <Link to="/" className="text-navy/60 hover:text-gold transition-colors inline-flex items-center gap-2 mb-6 uppercase tracking-widest text-xs">
