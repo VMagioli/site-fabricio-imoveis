@@ -185,7 +185,7 @@ const PropertyDetails: React.FC = () => {
             <SEO
                 title={`${property.title} | Fabrício Magioli`}
                 description="Agende sua visita para conhecer este imóvel. Aceitamos financiamento e FGTS. Veja fotos e detalhes aqui."
-                image={property.image}
+                image={property.image[0]}
             />
             {/* Header / Breadcrumb */}
             <div className="bg-navy pt-32 pb-12">
@@ -222,7 +222,7 @@ const PropertyDetails: React.FC = () => {
                         <div className="bg-white p-2 rounded-sm shadow-xl">
                             <div className="relative h-[400px] md:h-[600px] overflow-hidden rounded-sm group">
                                 <img
-                                    src={property.image}
+                                    src={property.image[0]}
                                     alt={property.title}
                                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                                 />
@@ -238,9 +238,9 @@ const PropertyDetails: React.FC = () => {
                             </div>
                             <div className="grid grid-cols-4 gap-2 mt-2">
                                 {/* Mock thumbnails */}
-                                {[1, 2, 3, 4].map((_, idx) => (
+                                {property.image.slice(0, 4).map((img, idx) => (
                                     <div key={idx} className="h-24 overflow-hidden rounded-sm cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
-                                        <img src={property.image} className="w-full h-full object-cover" alt={`View ${idx}`} />
+                                        <img src={img} className="w-full h-full object-cover" alt={`View ${idx}`} />
                                     </div>
                                 ))}
                             </div>
@@ -306,26 +306,25 @@ const PropertyDetails: React.FC = () => {
 
                             <div className="space-y-6 text-gray-600 leading-relaxed font-light">
                                 <p>
-                                    Este magnífico imóvel em {property.location} define o padrão de luxo e sofisticação.
-                                    Com acabamentos de altíssimo padrão e uma localização privilegiada, oferece o equilíbrio perfeito entre conforto e exclusividade.
-                                </p>
-                                <p>
-                                    Cada detalhe foi cuidadosamente planejado para proporcionar uma experiência de vida inigualável.
-                                    A ampla área social integra-se perfeitamente aos espaços externos, criando um ambiente ideal para receber convidados ou desfrutar de momentos de tranquilidade.
+                                    {property.description || 'Descrição não disponível.'}
                                 </p>
                             </div>
 
                             <div className="mt-10">
                                 <h4 className="font-bold text-navy uppercase tracking-widest text-sm mb-6">Destaques do Imóvel</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {['Vista Panorâmica', 'Acabamento Premium', 'Segurança 24h', 'Área de Lazer Completa', 'Automação Residencial', 'Vagas de Garagem'].map((feat, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 text-gray-600">
-                                            <div className="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center text-gold">
-                                                <Check size={12} strokeWidth={3} />
+                                    {property.features && property.features.length > 0 ? (
+                                        property.features.map((feat, idx) => (
+                                            <div key={idx} className="flex items-center gap-3 text-gray-600">
+                                                <div className="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center text-gold">
+                                                    <Check size={12} strokeWidth={3} />
+                                                </div>
+                                                <span className="text-sm">{feat}</span>
                                             </div>
-                                            <span className="text-sm">{feat}</span>
-                                        </div>
-                                    ))}
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-400 text-sm italic">Nenhum destaque cadastrado.</p>
+                                    )}
                                 </div>
                             </div>
                         </div>

@@ -7,7 +7,7 @@ export interface Property {
   beds: number;
   baths: number;
   area: string;
-  image: string;
+  image: string[];
   type: 'Comprar' | 'Alugar';
   category: 'Apartamento' | 'Cobertura' | 'Casa' | 'Terreno';
   suites?: number;
@@ -15,6 +15,8 @@ export interface Property {
   land_area?: number;
   built_area?: number;
   pet_friendly?: boolean;
+  description?: string;
+  features?: string[];
 }
 
 export interface NavLink {

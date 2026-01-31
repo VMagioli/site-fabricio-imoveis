@@ -10,7 +10,7 @@ const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
   <div className="group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
     <div className="relative h-[300px] overflow-hidden">
       <img
-        src={property.image}
+        src={property.image[0]}
         alt={property.title}
         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
