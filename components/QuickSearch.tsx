@@ -31,7 +31,11 @@ const QuickSearch: React.FC = () => {
               <option>Campo Grande</option>
               <option>Bangu</option>
               <option>Santa Cruz</option>
-              <option>Méier</option>
+              <option>Zona Portuária e Centro</option>
+              <option>Recreio dos Bandeirantes</option>
+              <option>Barra da Tijuca</option>
+              <option>Niterói</option>
+              <option>Zona Norte</option>
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
           </div>
