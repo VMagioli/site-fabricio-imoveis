@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint, ChevronLeft, ChevronRight, Play } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { z } from 'zod';
@@ -8,6 +8,7 @@ import SEO from '../components/SEO';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import Zoom from "yet-another-react-lightbox/plugins/zoom";
+import Video from "yet-another-react-lightbox/plugins/video";
 
 const visitSchema = z.object({
     name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -98,13 +99,15 @@ const PropertyDetails: React.FC = () => {
 
 
     const nextImage = () => {
-        if (!property || !property.image) return;
-        setCurrentImageIndex((prev) => (prev + 1) % property.image.length);
+        if (!property) return;
+        const totalSlides = property.image.length + (property.video ? 1 : 0);
+        setCurrentImageIndex((prev) => (prev + 1) % totalSlides);
     };
 
     const prevImage = () => {
-        if (!property || !property.image) return;
-        setCurrentImageIndex((prev) => (prev - 1 + property.image.length) % property.image.length);
+        if (!property) return;
+        const totalSlides = property.image.length + (property.video ? 1 : 0);
+        setCurrentImageIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -239,15 +242,23 @@ const PropertyDetails: React.FC = () => {
                         {/* Gallery (Placeholder for multiple images, using single image for now) */}
                         <div className="bg-white p-2 rounded-sm shadow-xl">
                             <div className="relative aspect-video w-full overflow-hidden rounded-sm group bg-gray-100">
-                                <img
-                                    src={property.image[currentImageIndex]}
-                                    alt={property.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-pointer"
-                                    onClick={() => {
-                                        setLightboxIndex(currentImageIndex);
-                                        setLightboxOpen(true);
-                                    }}
-                                />
+                                {property.video && currentImageIndex === property.image.length ? (
+                                    <video
+                                        src={property.video}
+                                        controls
+                                        className="w-full h-full object-cover"
+                                    />
+                                ) : (
+                                    <img
+                                        src={property.image[currentImageIndex]}
+                                        alt={property.title}
+                                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-pointer"
+                                        onClick={() => {
+                                            setLightboxIndex(currentImageIndex);
+                                            setLightboxOpen(true);
+                                        }}
+                                    />
+                                )}
                                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                                     <button
                                         onClick={handleShare}
@@ -259,7 +270,7 @@ const PropertyDetails: React.FC = () => {
                                 </div>
 
                                 {/* Navigation Arrows */}
-                                {property.image.length > 1 && (
+                                {(property.image.length + (property.video ? 1 : 0)) > 1 && (
                                     <>
                                         <button
                                             onClick={(e) => { e.stopPropagation(); prevImage(); }}
@@ -287,6 +298,14 @@ const PropertyDetails: React.FC = () => {
                                         <img src={img} className="w-full h-full object-cover" alt={`View ${idx}`} />
                                     </div>
                                 ))}
+                                {property.video && (
+                                    <div
+                                        onClick={() => setCurrentImageIndex(property.image.length)}
+                                        className={`flex-shrink-0 w-24 h-16 overflow-hidden rounded-sm cursor-pointer transition-opacity bg-black flex items-center justify-center ${currentImageIndex === property.image.length ? 'opacity-100 ring-2 ring-gold' : 'opacity-70 hover:opacity-100'}`}
+                                    >
+                                        <Play size={24} className="text-white" />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -465,8 +484,11 @@ const PropertyDetails: React.FC = () => {
                         open={lightboxOpen}
                         close={() => setLightboxOpen(false)}
                         index={lightboxIndex}
-                        slides={property.image.map(src => ({ src }))}
-                        plugins={[Zoom]}
+                        slides={[
+                            ...property.image.map(src => ({ src })),
+                            ...(property.video ? [{ type: "video" as const, sources: [{ src: property.video, type: "video/mp4" }] }] : [])
+                        ]}
+                        plugins={[Zoom, Video]}
                         zoom={{
                             maxZoomPixelRatio: 3,
                             zoomInMultiplier: 2
