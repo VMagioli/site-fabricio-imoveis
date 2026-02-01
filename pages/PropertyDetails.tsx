@@ -314,7 +314,8 @@ const PropertyDetails: React.FC = () => {
                             <h3 className="font-serif text-2xl text-navy mb-8">Características Principais</h3>
                             <div className="grid grid-cols-3 md:grid-cols-6 gap-8 border-b border-gray-100 pb-8 mb-8">
                                 <div className="flex flex-col items-center text-center p-4 bg-pearl/30 rounded-sm">
-                                    <BedDouble size={24} className="text-gold mb-3" />
+                                    <BedDouble size={24} className="text-gold mb-2" />
+                                    <span className="text-[10px] uppercase tracking-widest text-gray-500">até</span>
                                     <span className="text-xl font-serif text-navy mb-1">{property.beds}</span>
                                     <span className="text-[10px] uppercase tracking-widest text-gray-500">Quartos</span>
                                 </div>
