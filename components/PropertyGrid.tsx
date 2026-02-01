@@ -7,7 +7,7 @@ import { Property } from '../types';
 import { Link } from 'react-router-dom';
 
 const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
-  <div className="group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+  <Link to={`/imovel/${property.id}`} className="block group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
     <div className="relative h-[300px] overflow-hidden">
       <img
         src={property.image[0]}
@@ -51,13 +51,14 @@ const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
           <span className="text-[10px] text-dark/50 uppercase tracking-widest block">Valor</span>
           <span className="text-xl font-bold text-gold">{property.price}</span>
         </div>
-        <Link to={`/imovel/${property.id}`} className="text-navy hover:text-gold transition-colors flex items-center gap-2 group/btn">
+        <div className="text-navy hover:text-gold transition-colors flex items-center gap-2 group/btn">
           <span className="font-bold text-xs uppercase tracking-widest">Detalhes</span>
           <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-        </Link>
+        </div>
       </div>
     </div>
-  </div>
+
+  </Link >
 );
 
 const PropertyGrid: React.FC = () => {

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint } from 'lucide-react';
+import { BedDouble, Bath, Square, MapPin, ArrowLeft, Check, Share2, Heart, CarFront, Ruler, PawPrint, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { z } from 'zod';
@@ -28,6 +28,7 @@ const PropertyDetails: React.FC = () => {
     });
     const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -87,6 +88,18 @@ const PropertyDetails: React.FC = () => {
         } catch (err) {
             console.error('Error sharing:', err);
         }
+    };
+
+
+
+    const nextImage = () => {
+        if (!property || !property.image) return;
+        setCurrentImageIndex((prev) => (prev + 1) % property.image.length);
+    };
+
+    const prevImage = () => {
+        if (!property || !property.image) return;
+        setCurrentImageIndex((prev) => (prev - 1 + property.image.length) % property.image.length);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -185,7 +198,7 @@ const PropertyDetails: React.FC = () => {
             <SEO
                 title={`${property.title} | Fabrício Magioli`}
                 description="Agende sua visita para conhecer este imóvel. Aceitamos financiamento e FGTS. Veja fotos e detalhes aqui."
-                image={property.image[0]}
+                image={property.image[currentImageIndex]}
             />
             {/* Header / Breadcrumb */}
             <div className="bg-navy pt-32 pb-12">
@@ -220,13 +233,13 @@ const PropertyDetails: React.FC = () => {
 
                         {/* Gallery (Placeholder for multiple images, using single image for now) */}
                         <div className="bg-white p-2 rounded-sm shadow-xl">
-                            <div className="relative h-[400px] md:h-[600px] overflow-hidden rounded-sm group">
+                            <div className="relative aspect-video w-full overflow-hidden rounded-sm group bg-gray-100">
                                 <img
-                                    src={property.image[0]}
+                                    src={property.image[currentImageIndex]}
                                     alt={property.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
                                 />
-                                <div className="absolute top-4 right-4 flex gap-2">
+                                <div className="absolute top-4 right-4 flex gap-2 z-10">
                                     <button
                                         onClick={handleShare}
                                         className="bg-white/90 p-3 rounded-full hover:bg-gold hover:text-navy transition-colors text-navy shadow-lg"
@@ -235,11 +248,33 @@ const PropertyDetails: React.FC = () => {
                                         <Share2 size={20} />
                                     </button>
                                 </div>
+
+                                {/* Navigation Arrows */}
+                                {property.image.length > 1 && (
+                                    <>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-gold hover:text-navy text-navy transition-colors shadow-lg z-10"
+                                        >
+                                            <ChevronLeft size={24} />
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full hover:bg-gold hover:text-navy text-navy transition-colors shadow-lg z-10"
+                                        >
+                                            <ChevronRight size={24} />
+                                        </button>
+                                    </>
+                                )}
                             </div>
-                            <div className="grid grid-cols-4 gap-2 mt-2">
-                                {/* Mock thumbnails */}
-                                {property.image.slice(0, 4).map((img, idx) => (
-                                    <div key={idx} className="h-24 overflow-hidden rounded-sm cursor-pointer opacity-70 hover:opacity-100 transition-opacity">
+                            <div className="flex flex-row overflow-x-auto gap-2 mt-2 pb-2">
+                                {/* Thumbnails */}
+                                {property.image.map((img, idx) => (
+                                    <div
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`flex-shrink-0 w-24 h-16 overflow-hidden rounded-sm cursor-pointer transition-opacity ${currentImageIndex === idx ? 'opacity-100 ring-2 ring-gold' : 'opacity-70 hover:opacity-100'}`}
+                                    >
                                         <img src={img} className="w-full h-full object-cover" alt={`View ${idx}`} />
                                     </div>
                                 ))}
@@ -305,9 +340,15 @@ const PropertyDetails: React.FC = () => {
                             </div>
 
                             <div className="space-y-6 text-gray-600 leading-relaxed font-light">
-                                <p>
-                                    {property.description || 'Descrição não disponível.'}
-                                </p>
+                                {property.description ? (
+                                    property.description.split('\n').map((paragraph, idx) => (
+                                        <p key={idx} className="mb-4 text-justify">
+                                            {paragraph || <br />}
+                                        </p>
+                                    ))
+                                ) : (
+                                    <p>Descrição não disponível.</p>
+                                )}
                             </div>
 
                             <div className="mt-10">
