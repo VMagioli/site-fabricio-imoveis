@@ -50,8 +50,7 @@ const QuickSearch: React.FC = () => {
               <option value="Zona Oeste">Zona Oeste</option>
               <option value="Zona Norte">Zona Norte</option>
               <option value="Zona Sul">Zona Sul</option>
-              <option value="Zona Portuária">Zona Portuária</option>
-              <option value="Zona Sudoeste">Zona Sudoeste</option>
+              <option value="Porto Maravilha">Porto Maravilha</option>
               <option value="Centro">Centro</option>
               <option value="Niterói">Niterói</option>
             </select>
