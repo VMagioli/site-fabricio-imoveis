@@ -5,7 +5,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { BedDouble, Bath, Square, ArrowRight, ArrowLeft } from 'lucide-react';
 import SEO from '../components/SEO';
 
-import { Search, MapPin, Building, ChevronDown } from 'lucide-react';
+import { Search, MapPin, Building, ChevronDown, Map } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
 
 const Properties: React.FC = () => {
@@ -17,6 +17,7 @@ const Properties: React.FC = () => {
 
     // Filter States
     const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [selectedZone, setSelectedZone] = useState('Todas');
     const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
 
     const handleSearch = () => {
@@ -24,6 +25,10 @@ const Properties: React.FC = () => {
 
         if (selectedCategory !== 'Todos') {
             filtered = filtered.filter(p => p.category === selectedCategory);
+        }
+
+        if (selectedZone !== 'Todas') {
+            filtered = filtered.filter(p => p.zone === selectedZone);
         }
 
         if (selectedLocation !== 'Todos os Bairros') {
@@ -37,9 +42,11 @@ const Properties: React.FC = () => {
         // Initialize filters from URL
         const categoryParam = searchParams.get('category');
         const locationParam = searchParams.get('location');
+        const zoneParam = searchParams.get('zone');
 
         if (categoryParam) setSelectedCategory(categoryParam);
         if (locationParam) setSelectedLocation(locationParam);
+        if (zoneParam) setSelectedZone(zoneParam);
     }, [searchParams]);
 
     useEffect(() => {
@@ -47,7 +54,7 @@ const Properties: React.FC = () => {
         if (properties.length > 0) {
             handleSearch();
         }
-    }, [properties, selectedCategory, selectedLocation]);
+    }, [properties, selectedCategory, selectedLocation, selectedZone]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -96,7 +103,7 @@ const Properties: React.FC = () => {
                     <div className="flex flex-col md:flex-row items-end gap-6">
 
                         {/* Category Filter */}
-                        <div className="w-full md:w-1/3">
+                        <div className="w-full md:w-1/4">
                             <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Pretensão/Tipo</label>
                             <div className="relative">
                                 <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
@@ -114,8 +121,30 @@ const Properties: React.FC = () => {
                             </div>
                         </div>
 
+                        {/* Zone Filter */}
+                        <div className="w-full md:w-1/4">
+                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Zona</label>
+                            <div className="relative">
+                                <Map className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
+                                <select
+                                    value={selectedZone}
+                                    onChange={(e) => setSelectedZone(e.target.value)}
+                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
+                                >
+                                    <option value="Todas">Selecione a Zona</option>
+                                    <option value="Zona Oeste">Zona Oeste</option>
+                                    <option value="Zona Norte">Zona Norte</option>
+                                    <option value="Zona Sul">Zona Sul</option>
+                                    <option value="Zona Portuária">Zona Portuária</option>
+                                    <option value="Zona Sudoeste">Zona Sudoeste</option>
+                                    <option value="Centro">Centro</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
+                            </div>
+                        </div>
+
                         {/* Neighborhood Filter */}
-                        <div className="w-full md:w-1/3">
+                        <div className="w-full md:w-1/4">
                             <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Bairro</label>
                             <div className="relative">
                                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
@@ -139,7 +168,7 @@ const Properties: React.FC = () => {
                         </div>
 
                         {/* Search Button */}
-                        <div className="w-full md:w-1/3">
+                        <div className="w-full md:w-1/4">
                             <button
                                 onClick={handleSearch}
                                 className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-3 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0"
@@ -167,7 +196,7 @@ const Properties: React.FC = () => {
                             <div className="col-span-3 text-center py-20 text-gray-500">
                                 <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
                                 <button
-                                    onClick={() => { setSelectedCategory('Todos'); setSelectedLocation('Todos os Bairros'); setFilteredProperties(properties); }}
+                                    onClick={() => { setSelectedCategory('Todos'); setSelectedZone('Todas'); setSelectedLocation('Todos os Bairros'); setFilteredProperties(properties); }}
                                     className="text-gold font-bold mt-4 hover:underline"
                                 >
                                     Limpar filtros

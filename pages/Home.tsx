@@ -28,7 +28,7 @@ const Home: React.FC = () => {
               <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Realize o sonho da casa própria</span>
 
               <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
-              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 2.000</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 3.000</span>
 
               <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
               <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Use seu FGTS na entrada</span>
@@ -49,7 +49,7 @@ const Home: React.FC = () => {
               <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Realize o sonho da casa própria</span>
 
               <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
-              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 2.000</span>
+              <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Renda familiar a partir de R$ 3.000</span>
 
               <span className="text-xl md:text-2xl text-gold font-serif mx-4">•</span>
               <span className="text-xl md:text-2xl text-pearl font-light tracking-wide">Use seu FGTS na entrada</span>
