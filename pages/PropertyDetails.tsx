@@ -7,6 +7,7 @@ import { z } from 'zod';
 import SEO from '../components/SEO';
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import Zoom from "yet-another-react-lightbox/plugins/zoom";
 
 const visitSchema = z.object({
     name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -465,6 +466,11 @@ const PropertyDetails: React.FC = () => {
                         close={() => setLightboxOpen(false)}
                         index={lightboxIndex}
                         slides={property.image.map(src => ({ src }))}
+                        plugins={[Zoom]}
+                        zoom={{
+                            maxZoomPixelRatio: 3,
+                            zoomInMultiplier: 2
+                        }}
                     />
                 )
             }
