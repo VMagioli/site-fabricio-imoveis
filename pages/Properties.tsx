@@ -1,68 +1,53 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { BedDouble, Bath, Square, ArrowRight, ArrowLeft } from 'lucide-react';
 import SEO from '../components/SEO';
 
-const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
-    <div className="group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
-        <div className="relative h-[300px] overflow-hidden">
-            <img
-                src={property.image}
-                alt={property.title}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-            />
-            <div className="absolute top-4 left-4 bg-navy/80 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
-                {property.category}
-            </div>
-            <div className="absolute top-4 right-4 bg-gold text-navy text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-sm">
-                {property.type}
-            </div>
-        </div>
-
-        <div className="p-8">
-            <div className="mb-4">
-                <h3 className="font-serif text-xl text-navy mb-2 leading-tight min-h-[56px]">{property.title}</h3>
-                <p className="text-royal font-medium text-sm flex items-center gap-1">
-                    <span className="w-4 h-[1px] bg-royal"></span>
-                    {property.location}
-                </p>
-            </div>
-
-            <div className="flex justify-between items-center py-4 border-y border-pearl mb-6">
-                <div className="flex flex-col items-center">
-                    <span className="text-dark/40 mb-1"><BedDouble size={18} /></span>
-                    <span className="text-xs font-bold text-navy">{property.beds} Quartos</span>
-                </div>
-                <div className="flex flex-col items-center">
-                    <span className="text-dark/40 mb-1"><Bath size={18} /></span>
-                    <span className="text-xs font-bold text-navy">{property.baths} Banheiros</span>
-                </div>
-                <div className="flex flex-col items-center">
-                    <span className="text-dark/40 mb-1"><Square size={18} /></span>
-                    <span className="text-xs font-bold text-navy">{property.area}</span>
-                </div>
-            </div>
-
-            <div className="flex justify-between items-center">
-                <div>
-                    <span className="text-[10px] text-dark/50 uppercase tracking-widest block">Valor sugerido</span>
-                    <span className="text-xl font-bold text-gold">{property.price}</span>
-                </div>
-                <Link to={`/imovel/${property.id}`} className="text-navy hover:text-gold transition-colors flex items-center gap-2 group/btn">
-                    <span className="font-bold text-xs uppercase tracking-widest">Detalhes</span>
-                    <ArrowRight size={16} className="transition-transform group-hover/btn:translate-x-1" />
-                </Link>
-            </div>
-        </div>
-    </div>
-);
+import { Search, MapPin, Building, ChevronDown } from 'lucide-react';
+import PropertyCard from '../components/PropertyCard';
 
 const Properties: React.FC = () => {
     const [properties, setProperties] = useState<Property[]>([]);
+    const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchParams] = useSearchParams();
+
+    // Filter States
+    const [selectedCategory, setSelectedCategory] = useState('Todos');
+    const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
+
+    const handleSearch = () => {
+        let filtered = properties;
+
+        if (selectedCategory !== 'Todos') {
+            filtered = filtered.filter(p => p.category === selectedCategory);
+        }
+
+        if (selectedLocation !== 'Todos os Bairros') {
+            filtered = filtered.filter(p => p.location.includes(selectedLocation === 'Zona Portuária e Centro' ? 'Centro' : selectedLocation));
+        }
+
+        setFilteredProperties(filtered);
+    };
+
+    useEffect(() => {
+        // Initialize filters from URL
+        const categoryParam = searchParams.get('category');
+        const locationParam = searchParams.get('location');
+
+        if (categoryParam) setSelectedCategory(categoryParam);
+        if (locationParam) setSelectedLocation(locationParam);
+    }, [searchParams]);
+
+    useEffect(() => {
+        // Run filter when properties or filters change
+        if (properties.length > 0) {
+            handleSearch();
+        }
+    }, [properties, selectedCategory, selectedLocation]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -76,6 +61,8 @@ const Properties: React.FC = () => {
 
                 if (data) {
                     setProperties(data as Property[]);
+                    // We don't set filteredProperties here immediately because the 
+                    // useEffect above will handle it based on current filters/URL
                 }
             } catch (err) {
                 console.error('Error fetching properties:', err);
@@ -104,6 +91,66 @@ const Properties: React.FC = () => {
                     <div className="w-20 h-1 bg-gold"></div>
                 </div>
 
+                {/* Search Filters */}
+                <div className="bg-white rounded-sm shadow-xl p-6 mb-12 -mt-6 border border-gray-100">
+                    <div className="flex flex-col md:flex-row items-end gap-6">
+
+                        {/* Category Filter */}
+                        <div className="w-full md:w-1/3">
+                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Pretensão/Tipo</label>
+                            <div className="relative">
+                                <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
+                                >
+                                    <option value="Todos">Todos</option>
+                                    <option value="Apartamento">Apartamento</option>
+                                    <option value="Casa">Casa</option>
+                                    <option value="Terreno">Terreno</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
+                            </div>
+                        </div>
+
+                        {/* Neighborhood Filter */}
+                        <div className="w-full md:w-1/3">
+                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Bairro</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
+                                <select
+                                    value={selectedLocation}
+                                    onChange={(e) => setSelectedLocation(e.target.value)}
+                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
+                                >
+                                    <option>Todos os Bairros</option>
+                                    <option>Campo Grande</option>
+                                    <option>Bangu</option>
+                                    <option>Santa Cruz</option>
+                                    <option>Zona Portuária e Centro</option>
+                                    <option>Recreio dos Bandeirantes</option>
+                                    <option>Barra da Tijuca</option>
+                                    <option>Niterói</option>
+                                    <option>Zona Norte</option>
+                                </select>
+                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
+                            </div>
+                        </div>
+
+                        {/* Search Button */}
+                        <div className="w-full md:w-1/3">
+                            <button
+                                onClick={handleSearch}
+                                className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-3 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0"
+                            >
+                                <Search size={20} />
+                                <span className="uppercase text-sm tracking-widest">BUSCAR IMÓVEL</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 {loading ? (
                     <div className="flex justify-center items-center py-20">
                         <div className="text-navy font-serif text-xl animate-pulse">Carregando todos os imóveis...</div>
@@ -112,9 +159,21 @@ const Properties: React.FC = () => {
                     <div className="text-center py-10 text-red-500">{error}</div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        {properties.map((prop) => (
-                            <PropertyCard key={prop.id} property={prop} />
-                        ))}
+                        {filteredProperties.length > 0 ? (
+                            filteredProperties.map((prop) => (
+                                <PropertyCard key={prop.id} property={prop} />
+                            ))
+                        ) : (
+                            <div className="col-span-3 text-center py-20 text-gray-500">
+                                <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
+                                <button
+                                    onClick={() => { setSelectedCategory('Todos'); setSelectedLocation('Todos os Bairros'); setFilteredProperties(properties); }}
+                                    className="text-gold font-bold mt-4 hover:underline"
+                                >
+                                    Limpar filtros
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

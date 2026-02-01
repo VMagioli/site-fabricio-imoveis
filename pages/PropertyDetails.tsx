@@ -5,6 +5,8 @@ import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { z } from 'zod';
 import SEO from '../components/SEO';
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 const visitSchema = z.object({
     name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
@@ -29,6 +31,8 @@ const PropertyDetails: React.FC = () => {
     const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+    const [lightboxOpen, setLightboxOpen] = React.useState(false);
+    const [lightboxIndex, setLightboxIndex] = React.useState(0);
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -217,7 +221,7 @@ const PropertyDetails: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex flex-col items-end">
-                            <span className="text-white/60 text-sm uppercase tracking-widest mb-1">Valor de Venda</span>
+                            <span className="text-white/60 text-sm uppercase tracking-widest mb-1">A partir de</span>
                             <span className="text-3xl md:text-4xl font-serif text-gold">{property.price}</span>
                         </div>
                     </div>
@@ -237,7 +241,11 @@ const PropertyDetails: React.FC = () => {
                                 <img
                                     src={property.image[currentImageIndex]}
                                     alt={property.title}
-                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
+                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-pointer"
+                                    onClick={() => {
+                                        setLightboxIndex(currentImageIndex);
+                                        setLightboxOpen(true);
+                                    }}
                                 />
                                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                                     <button
@@ -449,7 +457,18 @@ const PropertyDetails: React.FC = () => {
 
                 </div>
             </div>
-        </div>
+
+            {
+                property && (
+                    <Lightbox
+                        open={lightboxOpen}
+                        close={() => setLightboxOpen(false)}
+                        index={lightboxIndex}
+                        slides={property.image.map(src => ({ src }))}
+                    />
+                )
+            }
+        </div >
     );
 };
 
