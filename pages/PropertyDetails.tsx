@@ -241,18 +241,18 @@ const PropertyDetails: React.FC = () => {
 
                         {/* Gallery (Placeholder for multiple images, using single image for now) */}
                         <div className="bg-white p-2 rounded-sm shadow-xl">
-                            <div className="relative aspect-video w-full overflow-hidden rounded-sm group bg-gray-100">
+                            <div className="relative aspect-video w-full overflow-hidden rounded-sm group bg-black">
                                 {property.video && currentImageIndex === property.image.length ? (
                                     <video
                                         src={property.video}
                                         controls
-                                        className="w-full h-full object-cover"
+                                        className="w-full h-full object-contain"
                                     />
                                 ) : (
                                     <img
                                         src={property.image[currentImageIndex]}
                                         alt={property.title}
-                                        className="w-full h-full object-cover transition-transform duration-700 hover:scale-105 cursor-pointer"
+                                        className="w-full h-full object-contain transition-transform duration-700 hover:scale-105 cursor-pointer"
                                         onClick={() => {
                                             setLightboxIndex(currentImageIndex);
                                             setLightboxOpen(true);
