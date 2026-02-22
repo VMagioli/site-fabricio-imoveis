@@ -19,7 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/imoveis" element={<Properties />} />
-          <Route path="/imovel/:id" element={<PropertyDetails />} />
+          <Route path="/imovel/:slug" element={<PropertyDetails />} />
           <Route path="/contato" element={<Contact />} />
           <Route path="/politica-de-privacidade" element={<PrivacyPolicy />} />
         </Routes>

@@ -4,7 +4,7 @@ import { BedDouble, Bath, Square, ArrowRight } from 'lucide-react';
 import { Property } from '../types';
 
 const PropertyCard: React.FC<{ property: Property }> = ({ property }) => (
-    <Link to={`/imovel/${property.id}`} className="block group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
+    <Link to={`/imovel/${property.slug}`} className="block group bg-white rounded-sm overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2">
         <div className="relative aspect-video w-full overflow-hidden">
             <img
                 src={Array.isArray(property.image) ? property.image[0] : property.image}

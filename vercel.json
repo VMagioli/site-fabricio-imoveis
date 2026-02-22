@@ -2,7 +2,7 @@
     "installCommand": "npm install --legacy-peer-deps",
     "rewrites": [
         {
-            "source": "/imovel/:id",
+            "source": "/imovel/:slug",
             "has": [
                 {
                     "type": "header",
@@ -10,7 +10,7 @@
                     "value": "(?i).*(facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|pinterest|skype).*$"
                 }
             ],
-            "destination": "/api/og?id=:id"
+            "destination": "/api/og?slug=:slug"
         },
         {
             "source": "/(.*)",

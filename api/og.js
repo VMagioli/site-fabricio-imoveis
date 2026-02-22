@@ -1,9 +1,9 @@
 
 export default async function handler(req, res) {
-    const { id } = req.query;
+    const { slug } = req.query;
 
-    if (!id) {
-        return res.status(400).send('Property ID is required');
+    if (!slug) {
+        return res.status(400).send('Property slug is required');
     }
 
     const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
     try {
         const response = await fetch(
-            `${SUPABASE_URL}/rest/v1/properties?id=eq.${id}&select=*`,
+            `${SUPABASE_URL}/rest/v1/properties?slug=eq.${slug}&select=*`,
             {
                 headers: {
                     apikey: SUPABASE_KEY,
@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         const title = `${property.title} | Fabrício Magioli`;
         const description = property.description?.substring(0, 160) || 'Confira este imóvel exclusivo.';
         const image = property.image && property.image[0] ? property.image[0] : '';
-        const url = `https://fabricio-magioli-imoveis-de-luxo.vercel.app/imovel/${id}`;
+        const url = `https://fabricio-magioli-imoveis-de-luxo.vercel.app/imovel/${slug}`;
 
         const html = `
       <!DOCTYPE html>

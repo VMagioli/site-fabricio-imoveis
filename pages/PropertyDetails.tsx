@@ -18,7 +18,7 @@ const visitSchema = z.object({
 });
 
 const PropertyDetails: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+    const { slug } = useParams<{ slug: string }>();
     const [property, setProperty] = React.useState<Property | null>(null);
     const [loading, setLoading] = React.useState(true);
     const [error, setError] = React.useState<string | null>(null);
@@ -39,12 +39,12 @@ const PropertyDetails: React.FC = () => {
     useEffect(() => {
         window.scrollTo(0, 0);
         const fetchProperty = async () => {
-            if (!id) return;
+            if (!slug) return;
             try {
                 const { data, error } = await supabase
                     .from('properties')
                     .select('*')
-                    .eq('id', id)
+                    .eq('slug', slug)
                     .single();
 
                 if (error) throw error;
@@ -61,7 +61,7 @@ const PropertyDetails: React.FC = () => {
         };
 
         fetchProperty();
-    }, [id]);
+    }, [slug]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
