@@ -204,9 +204,10 @@ const PropertyDetails: React.FC = () => {
     return (
         <div className="bg-pearl min-h-screen pb-20">
             <SEO
-                title={`${property.title} | Fabrício Magioli`}
-                description="Agende sua visita para conhecer este imóvel. Aceitamos financiamento e FGTS. Veja fotos e detalhes aqui."
-                image={property.image[currentImageIndex]}
+                title={`${property.title} em ${property.location}`}
+                description={property.description?.substring(0, 150) || "Confira os detalhes deste imóvel exclusivo."}
+                image={property.image?.[0]}
+                url={window.location.href}
             />
             {/* Header / Breadcrumb */}
             <div className="bg-navy pt-32 pb-12">
@@ -251,7 +252,7 @@ const PropertyDetails: React.FC = () => {
                                 ) : (
                                     <img
                                         src={property.image[currentImageIndex]}
-                                        alt={property.title}
+                                        alt={`Foto de ${property.title} - ${currentImageIndex + 1}`}
                                         className="w-full h-full object-contain transition-transform duration-700 hover:scale-105 cursor-pointer"
                                         onClick={() => {
                                             setLightboxIndex(currentImageIndex);
@@ -295,7 +296,7 @@ const PropertyDetails: React.FC = () => {
                                         onClick={() => setCurrentImageIndex(idx)}
                                         className={`flex-shrink-0 w-24 h-16 overflow-hidden rounded-sm cursor-pointer transition-opacity ${currentImageIndex === idx ? 'opacity-100 ring-2 ring-gold' : 'opacity-70 hover:opacity-100'}`}
                                     >
-                                        <img src={img} className="w-full h-full object-cover" alt={`View ${idx}`} />
+                                        <img src={img} className="w-full h-full object-cover" alt={`Foto de ${property.title} - ${idx + 1}`} />
                                     </div>
                                 ))}
                                 {property.video && (

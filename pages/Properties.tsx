@@ -85,8 +85,10 @@ const Properties: React.FC = () => {
     return (
         <div className="bg-pearl min-h-screen pt-32 pb-20">
             <SEO
-                title="Encontre seu Imóvel | Fabrício Magioli"
-                description="Confira nossa seleção de imóveis com as melhores condições de pagamento."
+                title="Imóveis de Alto Padrão"
+                description="Encontre seu novo lar no Rio de Janeiro. Seleção exclusiva de imóveis de luxo com atendimento personalizado."
+                image="/og-image.jpg"
+                url={window.location.href}
             />
             <div className="container mx-auto px-6">
                 <div className="mb-12">
