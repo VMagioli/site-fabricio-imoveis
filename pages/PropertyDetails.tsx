@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
@@ -15,8 +15,11 @@ import {
   ChevronLeft,
   ChevronRight,
   Play,
+  RefreshCw,
+  MessageCircle,
 } from 'lucide-react';
 import { supabase } from '../src/lib/supabase';
+import { withRetry } from '../src/lib/retry';
 import { Property } from '../types';
 import { z } from 'zod';
 import SEO from '../components/SEO';
@@ -26,9 +29,12 @@ import Zoom from 'yet-another-react-lightbox/plugins/zoom';
 import Video from 'yet-another-react-lightbox/plugins/video';
 
 const visitSchema = z.object({
-  name: z.string().min(3, 'Nome deve ter no mínimo 3 caracteres'),
-  contact: z.string().min(10, 'Contato (Email ou Telefone) deve ter no mínimo 10 caracteres'),
-  message: z.string().optional(),
+  name: z.string().trim().min(3, 'Nome deve ter no mínimo 3 caracteres'),
+  contact: z
+    .string()
+    .trim()
+    .min(10, 'Contato (Email ou Telefone) deve ter no mínimo 10 caracteres'),
+  message: z.string().trim().optional(),
   check_visit: z.string().optional(),
 });
 
@@ -36,7 +42,7 @@ const PropertyDetails: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const [property, setProperty] = React.useState<Property | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [loadError, setLoadError] = React.useState<'not_found' | 'network' | null>(null);
 
   const [formData, setFormData] = React.useState({
     name: '',
@@ -45,43 +51,62 @@ const PropertyDetails: React.FC = () => {
     check_visit: '',
   });
   const [fieldErrors, setFieldErrors] = React.useState<Record<string, string>>({});
-  const [submitFeedback, setSubmitFeedback] = React.useState('');
+  const [submitStatus, setSubmitStatus] = React.useState<
+    'idle' | 'submitting' | 'saved' | 'save_error'
+  >('idle');
+  const [whatsappFallbackUrl, setWhatsappFallbackUrl] = React.useState('');
   const [shareFeedback, setShareFeedback] = React.useState('');
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
   const [lightboxOpen, setLightboxOpen] = React.useState(false);
   const [lightboxIndex, setLightboxIndex] = React.useState(0);
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const fetchProperty = async () => {
-      if (!slug) return;
-      try {
-        const { data, error } = await supabase
+  const fetchProperty = useCallback(async () => {
+    if (!slug) {
+      setLoadError('not_found');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const result = await withRetry(async () => {
+        const res = await supabase
           .from('properties')
           .select('*')
           .eq('slug', slug)
-          .single();
+          .maybeSingle();
+        if (res.error) throw res.error;
+        return res.data;
+      });
 
-        if (error) throw error;
-
-        if (data) {
-          setProperty(data as Property);
-        }
-      } catch (err) {
-        console.error('Error fetching property:', err);
-        setError('Imóvel não encontrado ou erro ao carregar.');
-      } finally {
-        setLoading(false);
+      if (!result) {
+        setProperty(null);
+        setLoadError('not_found');
+      } else {
+        setProperty(result as Property);
       }
-    };
-
-    fetchProperty();
+    } catch (err) {
+      console.error('Error fetching property:', err);
+      setProperty(null);
+      setLoadError('network');
+    } finally {
+      setLoading(false);
+    }
   }, [slug]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    setCurrentImageIndex(0);
+    fetchProperty();
+  }, [fetchProperty]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    if (submitStatus === 'save_error' || submitStatus === 'saved') {
+      setSubmitStatus('idle');
+    }
     if (fieldErrors[name]) {
       setFieldErrors((prev) => {
         const newErrors = { ...prev };
@@ -124,12 +149,19 @@ const PropertyDetails: React.FC = () => {
     setCurrentImageIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
   };
 
+  const buildWhatsappUrl = (name: string, contact: string, message: string) => {
+    let text = `Olá, me chamo ${name}. Tenho interesse no imóvel ${property?.title || ''} e gostaria de agendar uma visita. Meu contato: ${contact}.`;
+    if (message) {
+      text += `\n\nMensagem: ${message}`;
+    }
+    return `https://wa.me/5521990132992?text=${encodeURIComponent(text)}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (formData.check_visit) {
-      setIsSubmitting(true);
-      setTimeout(() => setIsSubmitting(false), 1000);
+      setSubmitStatus('saved');
       return;
     }
 
@@ -145,40 +177,36 @@ const PropertyDetails: React.FC = () => {
       return;
     }
 
-    setIsSubmitting(true);
-    setSubmitFeedback('');
+    const valid = result.data;
+    const whatsappUrl = buildWhatsappUrl(valid.name, valid.contact, valid.message || '');
+    setWhatsappFallbackUrl(whatsappUrl);
+    setSubmitStatus('submitting');
 
     const propertyRef = `ID ${property?.id || 'N/A'} - ${property?.title || 'Unknown'}`;
 
     try {
       const { error: dbError } = await supabase.from('leads').insert([
         {
-          name: formData.name,
-          contact: formData.contact,
-          message: formData.message,
+          name: valid.name,
+          contact: valid.contact,
+          message: valid.message || '',
           property_ref: propertyRef,
         },
       ]);
 
-      if (dbError) console.error('Erro ao salvar lead:', dbError);
-    } catch (err) {
-      console.error('Erro inesperado ao salvar lead:', err);
-    }
+      if (dbError) {
+        throw dbError;
+      }
 
-    let text = `Olá, tenho interesse no imóvel ${property?.title}. Gostaria de agendar uma visita.`;
-    if (formData.message) {
-      text += `\n\nMensagem: ${formData.message}`;
-    }
-
-    const encodedText = encodeURIComponent(text);
-    const whatsappUrl = `https://wa.me/5521990132992?text=${encodedText}`;
-
-    setSubmitFeedback('Solicitação recebida com sucesso! Abrindo WhatsApp...');
-    setTimeout(() => {
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
-      setIsSubmitting(false);
+      // Só confirma recebimento e limpa o formulário se a gravação no banco foi confirmada
+      setSubmitStatus('saved');
       setFormData({ name: '', contact: '', message: '', check_visit: '' });
-    }, 800);
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      console.error('Erro ao salvar lead no Supabase:', err);
+      // Mantém os dados preenchidos e oferece alternativa explícita sem falso positivo
+      setSubmitStatus('save_error');
+    }
   };
 
   if (loading) {
@@ -191,14 +219,53 @@ const PropertyDetails: React.FC = () => {
     );
   }
 
+  if (loadError === 'network') {
+    return (
+      <main id="conteudo-principal" className="min-h-screen flex flex-col items-center justify-center bg-pearl pt-24 px-6 text-center space-y-5">
+        <Helmet>
+          <title>Erro ao carregar imóvel | Fabrício Magioli</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <h1 className="text-3xl font-serif text-navy">Não foi possível carregar este imóvel</h1>
+        <p className="text-sm text-gray-700 max-w-md">
+          Ocorreu uma instabilidade temporária na conexão. Tente novamente ou fale direto pelo WhatsApp.
+        </p>
+        <div className="flex flex-wrap gap-3 justify-center">
+          <button
+            type="button"
+            onClick={fetchProperty}
+            className="inline-flex items-center gap-2 bg-navy hover:bg-navy/90 text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-sm"
+          >
+            <RefreshCw size={15} aria-hidden="true" />
+            Tentar novamente
+          </button>
+          <Link
+            to="/imoveis"
+            className="inline-flex items-center gap-2 bg-white border border-gray-300 text-navy text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-sm hover:border-gold-dark"
+          >
+            Ver catálogo
+          </Link>
+        </div>
+      </main>
+    );
+  }
+
   if (!property) {
     return (
-      <main id="conteudo-principal" className="min-h-screen flex flex-col items-center justify-center bg-pearl pt-24 px-6 text-center">
-        <h1 className="text-3xl font-serif text-navy mb-4">
-          {error || 'Imóvel não encontrado'}
-        </h1>
-        <Link to="/" className="text-gold-dark font-bold hover:underline uppercase tracking-widest text-sm">
-          Voltar para Início
+      <main id="conteudo-principal" className="min-h-screen flex flex-col items-center justify-center bg-pearl pt-24 px-6 text-center space-y-4">
+        <Helmet>
+          <title>Imóvel não encontrado | Fabrício Magioli</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        <h1 className="text-3xl font-serif text-navy">Imóvel não encontrado</h1>
+        <p className="text-sm text-gray-700 max-w-md">
+          Este anúncio pode ter sido vendido ou removido. Confira outras oportunidades disponíveis no catálogo.
+        </p>
+        <Link
+          to="/imoveis"
+          className="bg-navy text-white font-bold px-6 py-3 rounded-sm uppercase tracking-widest text-xs hover:bg-navy/90 transition-colors"
+        >
+          Ver imóveis disponíveis
         </Link>
       </main>
     );
@@ -269,18 +336,22 @@ const PropertyDetails: React.FC = () => {
     ],
   };
 
+  const isSubmitting = submitStatus === 'submitting';
+
   return (
     <main id="conteudo-principal" className="bg-pearl min-h-screen pb-20">
       <SEO
         title={`${property.title} em ${property.location}`}
         description={
-          property.description?.substring(0, 155) || 'Confira os detalhes deste imóvel exclusivo no Rio de Janeiro.'
+          property.description?.substring(0, 155) ||
+          'Confira os detalhes deste imóvel exclusivo no Rio de Janeiro.'
         }
         image={property.image?.[0]}
       />
       <Helmet>
         <script type="application/ld+json">{JSON.stringify(listingJsonLd)}</script>
       </Helmet>
+
       {/* Header / Breadcrumb */}
       <div className="bg-navy pt-32 pb-12">
         <div className="container mx-auto px-6">
@@ -619,13 +690,72 @@ const PropertyDetails: React.FC = () => {
                   disabled={isSubmitting}
                   className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-4 rounded-sm transition-all uppercase tracking-widest text-xs shadow-lg transform hover:-translate-y-0.5 disabled:opacity-70 disabled:hover:translate-y-0 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? 'Enviando...' : 'Enviar Solicitação'}
+                  {isSubmitting ? 'Registrando solicitação...' : 'Enviar Solicitação'}
                 </button>
 
-                {submitFeedback && (
-                  <p role="status" aria-live="polite" className="text-xs text-navy font-medium text-center">
-                    {submitFeedback}
-                  </p>
+                {/* LGPD Notice */}
+                <p className="text-[11px] text-gray-600 leading-relaxed">
+                  Seus dados são salvos apenas para retorno sobre este imóvel e usados para iniciar o atendimento pelo WhatsApp. Consulte nossa{' '}
+                  <Link to="/politica-de-privacidade" className="text-royal underline hover:text-navy">
+                    Política de Privacidade
+                  </Link>
+                  .
+                </p>
+
+                {/* Honest confirmation ONLY after DB save */}
+                {submitStatus === 'saved' && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-3.5 rounded-sm text-xs space-y-2"
+                  >
+                    <p className="font-semibold">
+                      Solicitação registrada com sucesso! Abrimos o WhatsApp para agilizar seu atendimento.
+                    </p>
+                    {whatsappFallbackUrl && (
+                      <a
+                        href={whatsappFallbackUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 font-bold text-emerald-800 underline"
+                      >
+                        <MessageCircle size={14} aria-hidden="true" />
+                        Clique aqui se o WhatsApp não abriu
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Honest error + explicit WhatsApp fallback without clearing fields */}
+                {submitStatus === 'save_error' && (
+                  <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="bg-red-50 border border-red-200 text-red-900 p-4 rounded-sm text-xs space-y-3"
+                  >
+                    <p className="font-semibold">
+                      Não foi possível registrar sua solicitação no sistema agora. Seus dados continuam preenchidos acima.
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="submit"
+                        className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-2.5 px-4 rounded-sm uppercase tracking-wider text-[11px]"
+                      >
+                        Tentar enviar novamente
+                      </button>
+                      {whatsappFallbackUrl && (
+                        <a
+                          href={whatsappFallbackUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-2.5 px-4 rounded-sm uppercase tracking-wider text-[11px] inline-flex items-center justify-center gap-1.5"
+                        >
+                          <MessageCircle size={14} aria-hidden="true" />
+                          Continuar direto pelo WhatsApp
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 )}
               </form>
 

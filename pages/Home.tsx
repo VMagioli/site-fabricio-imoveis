@@ -8,7 +8,7 @@ import SEO from '../components/SEO';
 
 const BENEFITS = [
   'Realize o sonho da casa própria',
-  'Renda familiar a partir de R$ 3.000',
+  'Renda familiar a partir de R$ 2.000',
   'Use seu FGTS na entrada',
   'Financiamento Facilitado',
   'Subsídio do Governo',

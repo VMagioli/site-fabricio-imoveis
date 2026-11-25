@@ -51,6 +51,7 @@ export const propertyFormSchema = z.object({
   built_area: optionalPositiveNum,
   land_area: optionalPositiveNum,
   pet_friendly: z.boolean().default(false),
+  published: z.boolean().default(true),
   description: z.string().trim().max(8000).optional(),
   video: z
     .string()

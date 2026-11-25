@@ -11,7 +11,7 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'Qual é a renda familiar mínima para financiar um imóvel no Rio de Janeiro?',
     answer:
-      'É possível iniciar o processo de financiamento imobiliário com renda familiar a partir de R$ 2.000, podendo somar a renda de até mais de um participante (cônjuge, familiares ou amigos) para aumentar o valor aprovado e reduzir a entrada.',
+      'É possível iniciar o processo de financiamento imobiliário com renda familiar a partir de R$ 2.000 (sujeito à análise de crédito e às regras do programa habitacional vigente), podendo somar a renda de mais de um participante — cônjuge, familiares ou amigos — para aumentar o valor aprovado e reduzir a entrada.',
   },
   {
     question: 'Posso usar o meu FGTS na entrada do imóvel?',
@@ -26,7 +26,7 @@ const FAQ_ITEMS: FaqItem[] = [
   {
     question: 'Quais regiões do Rio de Janeiro o Fabrício Magioli atende?',
     answer:
-      'Atuo com forte especialização na Zona Oeste do Rio de Janeiro (Campo Grande, Bangu, Santa Cruz, Recreio, Barra da Tijuca e Barra Olímpica), além de oportunidades selecionadas na Baixada Fluminense(Nova Iguaçu e Duque de Caxias), Zona Norte, Zona Sul, Centro, Porto Maravilha e Niterói.',
+      'Atuo com forte especialização na Zona Oeste do Rio de Janeiro (Campo Grande, Bangu, Santa Cruz, Recreio, Barra da Tijuca e Barra Olímpica), além de oportunidades selecionadas na Baixada Fluminense (Nova Iguaçu e Duque de Caxias), Zona Norte, Zona Sul, Centro, Porto Maravilha e Niterói.',
   },
   {
     question: 'Como funciona a aprovação de crédito e o agendamento de visita?',

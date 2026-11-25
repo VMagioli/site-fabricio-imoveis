@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { MessageCircle, Mail, MapPin } from 'lucide-react';
 import { z } from 'zod';
@@ -186,6 +187,14 @@ const Contact: React.FC = () => {
               <MessageCircle size={18} aria-hidden="true" />
               Enviar via WhatsApp
             </button>
+
+            <p className="text-xs text-gray-600 leading-relaxed">
+              Ao clicar em enviar, seu nome, telefone, pretensão e mensagem serão abertos no aplicativo <strong>WhatsApp</strong> para atendimento direto com o corretor. Saiba mais na nossa{' '}
+              <Link to="/politica-de-privacidade" className="text-royal underline hover:text-navy">
+                Política de Privacidade
+              </Link>
+              .
+            </p>
           </form>
         </div>
 

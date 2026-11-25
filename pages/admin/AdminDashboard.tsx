@@ -44,6 +44,7 @@ const AdminDashboard: React.FC = () => {
   const [loadingProperties, setLoadingProperties] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [togglingPublishId, setTogglingPublishId] = useState<string | null>(null);
 
   // Leads & Newsletter state
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -84,10 +85,17 @@ const AdminDashboard: React.FC = () => {
   const fetchProperties = useCallback(async () => {
     setLoadingProperties(true);
     try {
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('properties')
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (error && error.code === '42703') {
+        const fallback = await supabase.from('properties').select('*');
+        data = fallback.data;
+        error = fallback.error;
+      }
+
       if (!error && data) {
         setProperties(data as Property[]);
       }
@@ -95,6 +103,28 @@ const AdminDashboard: React.FC = () => {
       setLoadingProperties(false);
     }
   }, []);
+
+  const handleTogglePublished = async (prop: Property) => {
+    const nextPublished = prop.published === false;
+    setTogglingPublishId(prop.id);
+    try {
+      const { error } = await supabase
+        .from('properties')
+        .update({ published: nextPublished })
+        .eq('id', prop.id);
+      if (error) {
+        alert(`Erro ao alterar status: ${error.message}`);
+        return;
+      }
+      setProperties((prev) =>
+        prev.map((item) =>
+          item.id === prop.id ? { ...item, published: nextPublished } : item
+        )
+      );
+    } finally {
+      setTogglingPublishId(null);
+    }
+  };
 
   const fetchLeadsAndNewsletter = useCallback(async () => {
     setLoadingLeads(true);
@@ -474,6 +504,15 @@ const AdminDashboard: React.FC = () => {
                     <span className="absolute top-3 right-3 bg-gold text-navy text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm">
                       {prop.type}
                     </span>
+                    <span
+                      className={`absolute bottom-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-sm ${
+                        prop.published === false
+                          ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                          : 'bg-emerald-700 text-white'
+                      }`}
+                    >
+                      {prop.published === false ? 'Rascunho' : 'Publicado'}
+                    </span>
                   </div>
 
                   <div className="p-5 flex-1 flex flex-col justify-between gap-4">
@@ -489,16 +528,30 @@ const AdminDashboard: React.FC = () => {
                       </p>
                     </div>
 
-                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 gap-2">
-                      <a
-                        href={`/imovel/${prop.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-semibold text-royal hover:underline"
-                      >
-                        Ver
-                        <ExternalLink size={13} aria-hidden="true" />
-                      </a>
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 gap-2 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        <a
+                          href={`/imovel/${prop.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-semibold text-royal hover:underline"
+                        >
+                          Ver
+                          <ExternalLink size={13} aria-hidden="true" />
+                        </a>
+                        <button
+                          type="button"
+                          onClick={() => handleTogglePublished(prop)}
+                          disabled={togglingPublishId === prop.id}
+                          className="text-xs font-bold text-gray-700 hover:text-navy underline disabled:opacity-50"
+                        >
+                          {togglingPublishId === prop.id
+                            ? '...'
+                            : prop.published === false
+                              ? 'Publicar'
+                              : 'Mover p/ rascunho'}
+                        </button>
+                      </div>
                       <div className="flex items-center gap-2">
                         <Link
                           to={`/gestao/imoveis/${prop.id}/editar`}

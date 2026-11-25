@@ -219,6 +219,13 @@ const Footer: React.FC = () => {
                   {feedbackMessage}
                 </p>
               )}
+              <p className="text-[11px] text-pearl/75 mt-3 leading-relaxed">
+                Seu e-mail é usado apenas para envio de novidades e lançamentos, podendo pedir remoção a qualquer momento. Veja a{' '}
+                <Link to="/politica-de-privacidade" className="underline hover:text-gold">
+                  Política de Privacidade
+                </Link>
+                .
+              </p>
             </form>
           </div>
         </div>

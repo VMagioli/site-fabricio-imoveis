@@ -1,9 +1,13 @@
-import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { ArrowRight, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { supabase } from '../src/lib/supabase';
+import { withRetry } from '../src/lib/retry';
 import { Property } from '../types';
 import PropertyCard from './PropertyCard';
+
+const CARD_COLUMNS =
+  'id, slug, title, price, location, zone, beds, baths, area, image, type, category';
 
 const PropertySkeleton: React.FC = () => (
   <div className="bg-white rounded-sm overflow-hidden shadow-sm animate-pulse" aria-hidden="true">
@@ -28,33 +32,43 @@ const PropertySkeleton: React.FC = () => (
 );
 
 const PropertyGrid: React.FC = () => {
-  const [properties, setProperties] = React.useState<Property[]>([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState<string | null>(null);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    const fetchProperties = async () => {
-      try {
-        const { data, error } = await supabase
+  const fetchProperties = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await withRetry(async () => {
+        const res = await supabase
           .from('properties')
-          .select('*')
+          .select(CARD_COLUMNS)
+          .eq('published', true)
           .limit(3);
 
-        if (error) throw error;
-
-        if (data) {
-          setProperties(data as Property[]);
+        if (res.error && res.error.code === '42703') {
+          const fallback = await supabase.from('properties').select(CARD_COLUMNS).limit(3);
+          if (fallback.error) throw fallback.error;
+          return fallback.data;
         }
-      } catch (err) {
-        console.error('Error fetching properties:', err);
-        setError('Não foi possível carregar os imóveis no momento.');
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchProperties();
+        if (res.error) throw res.error;
+        return res.data;
+      });
+
+      setProperties((data ?? []) as Property[]);
+    } catch (err) {
+      console.error('Error fetching featured properties:', err);
+      setError('Não foi possível carregar os imóveis em destaque no momento.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   return (
     <section id="imoveis" className="py-24 bg-pearl">
@@ -88,8 +102,16 @@ const PropertyGrid: React.FC = () => {
             <span className="sr-only">Carregando imóveis...</span>
           </div>
         ) : error ? (
-          <div role="alert" className="text-center py-10 text-red-700 font-medium">
-            {error}
+          <div role="alert" className="text-center py-12 bg-white rounded-sm border border-gray-200 shadow-sm space-y-4">
+            <p className="text-red-700 font-medium">{error}</p>
+            <button
+              type="button"
+              onClick={fetchProperties}
+              className="inline-flex items-center gap-2 bg-navy hover:bg-navy/90 text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-sm transition-colors"
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Tentar novamente
+            </button>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10">

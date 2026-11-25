@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Building, ChevronDown, Map } from 'lucide-react';
 import { usePropertyOptions } from '../src/hooks/usePropertyOptions';
+import { getLocationsForZone, isLocationCompatibleWithZone } from '../src/data/zoneLocations';
 
 const QuickSearch: React.FC = () => {
   const navigate = useNavigate();
@@ -10,11 +11,26 @@ const QuickSearch: React.FC = () => {
   const [zone, setZone] = useState('Todas');
   const [location, setLocation] = useState('Todos os Bairros');
 
+  const availableLocations = useMemo(
+    () => getLocationsForZone(zone, options.locations),
+    [zone, options.locations]
+  );
+
+  const handleZoneChange = (nextZone: string) => {
+    setZone(nextZone);
+    if (!isLocationCompatibleWithZone(location, nextZone, options.locations)) {
+      setLocation('Todos os Bairros');
+    }
+  };
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    navigate(
-      `/imoveis?category=${encodeURIComponent(category)}&location=${encodeURIComponent(location)}&zone=${encodeURIComponent(zone)}`
-    );
+    const params = new URLSearchParams();
+    if (category !== 'Todos') params.set('category', category);
+    if (zone !== 'Todas') params.set('zone', zone);
+    if (location !== 'Todos os Bairros') params.set('location', location);
+    const qs = params.toString();
+    navigate(qs ? `/imoveis?${qs}` : '/imoveis');
   };
 
   return (
@@ -31,7 +47,7 @@ const QuickSearch: React.FC = () => {
             htmlFor="quick-category"
             className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
           >
-            Pretensão
+            Categoria
           </label>
           <div className="relative">
             <Building
@@ -46,7 +62,7 @@ const QuickSearch: React.FC = () => {
               onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
-              <option value="Todos">Todos</option>
+              <option value="Todos">Todas as Categorias</option>
               {options.categories.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -79,10 +95,10 @@ const QuickSearch: React.FC = () => {
               id="quick-zone"
               name="zone"
               value={zone}
-              onChange={(e) => setZone(e.target.value)}
+              onChange={(e) => handleZoneChange(e.target.value)}
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
-              <option value="Todas">Selecione a Zona</option>
+              <option value="Todas">Todas as Zonas</option>
               {options.zones.map((z) => (
                 <option key={z} value={z}>
                   {z}
@@ -119,7 +135,7 @@ const QuickSearch: React.FC = () => {
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
               <option value="Todos os Bairros">Todos os Bairros</option>
-              {options.locations.map((loc) => (
+              {availableLocations.map((loc) => (
                 <option key={loc} value={loc}>
                   {loc}
                 </option>

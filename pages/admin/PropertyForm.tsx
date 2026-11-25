@@ -60,6 +60,7 @@ const PropertyForm: React.FC = () => {
   const [builtArea, setBuiltArea] = useState('');
   const [landArea, setLandArea] = useState('');
   const [petFriendly, setPetFriendly] = useState(false);
+  const [published, setPublished] = useState(true);
   const [description, setDescription] = useState('');
   const [video, setVideo] = useState('');
 
@@ -104,6 +105,7 @@ const PropertyForm: React.FC = () => {
         setBuiltArea(prop.built_area != null ? String(prop.built_area) : '');
         setLandArea(prop.land_area != null ? String(prop.land_area) : '');
         setPetFriendly(Boolean(prop.pet_friendly));
+        setPublished(prop.published !== false);
         setDescription(prop.description || '');
         setVideo(prop.video || '');
         setFeatures(Array.isArray(prop.features) ? prop.features : []);
@@ -239,6 +241,7 @@ const PropertyForm: React.FC = () => {
       built_area: builtArea,
       land_area: landArea,
       pet_friendly: petFriendly,
+      published,
       description,
       video: video.trim() || undefined,
     });
@@ -825,31 +828,54 @@ const PropertyForm: React.FC = () => {
             </div>
           </section>
 
-          {/* Submit */}
-          <div className="flex items-center justify-end gap-4 pt-2">
-            <Link
-              to="/gestao"
-              className="text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-navy px-5 py-3"
-            >
-              Cancelar
-            </Link>
-            <button
-              type="submit"
-              disabled={saving || uploadingImages || uploadingVideo}
-              className="inline-flex items-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-sm shadow-lg transition-colors disabled:opacity-60"
-            >
-              {saving ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" aria-hidden="true" />
-                  Salvando...
-                </>
-              ) : (
-                <>
-                  <Save size={16} aria-hidden="true" />
-                  {isEditing ? 'Salvar Alterações' : 'Publicar Imóvel'}
-                </>
-              )}
-            </button>
+          {/* Status de publicação & Submit */}
+          <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <label className="inline-flex items-start gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={published}
+                onChange={(e) => setPublished(e.target.checked)}
+                className="w-5 h-5 mt-0.5 accent-navy"
+              />
+              <span>
+                <span className="block text-sm font-bold text-navy">
+                  {published ? 'Publicado no site (visível ao público)' : 'Salvar como Rascunho (oculto no site)'}
+                </span>
+                <span className="block text-xs text-gray-600">
+                  Desmarque para guardar como rascunho no painel /gestao sem exibir no catálogo público nem no sitemap.
+                </span>
+              </span>
+            </label>
+
+            <div className="flex items-center justify-end gap-4 flex-shrink-0">
+              <Link
+                to="/gestao"
+                className="text-xs font-bold uppercase tracking-wider text-gray-600 hover:text-navy px-4 py-3"
+              >
+                Cancelar
+              </Link>
+              <button
+                type="submit"
+                disabled={saving || uploadingImages || uploadingVideo}
+                className="inline-flex items-center gap-2 bg-navy hover:bg-navy/90 text-white font-bold text-xs uppercase tracking-widest px-8 py-4 rounded-sm shadow-lg transition-colors disabled:opacity-60"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+                    Salvando...
+                  </>
+                ) : (
+                  <>
+                    <Save size={16} aria-hidden="true" />
+                    {isEditing
+                      ? 'Salvar Alterações'
+                      : published
+                        ? 'Publicar Imóvel'
+                        : 'Salvar Rascunho'}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       )}

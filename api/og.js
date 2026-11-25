@@ -18,20 +18,28 @@ export default async function handler(req, res) {
   const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
 
   try {
-    const response = await fetch(
-      `${SUPABASE_URL}/rest/v1/properties?slug=eq.${encodeURIComponent(rawSlug)}&select=title,description,image,slug`,
-      {
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: `Bearer ${SUPABASE_KEY}`,
-        },
-      }
+    const headers = {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+    };
+
+    let response = await fetch(
+      `${SUPABASE_URL}/rest/v1/properties?slug=eq.${encodeURIComponent(rawSlug)}&select=title,description,image,slug,published`,
+      { headers }
     );
+
+    if (!response.ok) {
+      response = await fetch(
+        `${SUPABASE_URL}/rest/v1/properties?slug=eq.${encodeURIComponent(rawSlug)}&select=title,description,image,slug`,
+        { headers }
+      );
+    }
 
     const data = await response.json();
     const property = Array.isArray(data) ? data[0] : null;
 
-    if (!property) {
+    if (!property || property.published === false) {
+      res.setHeader('X-Robots-Tag', 'noindex, nofollow');
       return res.status(404).send('Property not found');
     }
 

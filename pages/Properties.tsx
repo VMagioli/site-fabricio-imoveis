@@ -1,68 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
+import { withRetry } from '../src/lib/retry';
 import { Property } from '../types';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Search, MapPin, Building, ChevronDown, Map, Check, Tag } from 'lucide-react';
+import {
+  ArrowLeft,
+  Search,
+  MapPin,
+  Building,
+  ChevronDown,
+  Map,
+  Check,
+  Tag,
+  RefreshCw,
+} from 'lucide-react';
 import SEO from '../components/SEO';
 import PropertyCard from '../components/PropertyCard';
 import { NEIGHBORHOODS, getNeighborhoodBySlug } from '../src/data/neighborhoods';
 import { usePropertyOptions } from '../src/hooks/usePropertyOptions';
+import { getLocationsForZone, isLocationCompatibleWithZone } from '../src/data/zoneLocations';
+
+const CARD_COLUMNS =
+  'id, slug, title, price, location, zone, beds, baths, area, image, type, category';
+const PAGE_SIZE = 12;
 
 const Properties: React.FC = () => {
   const { neighborhoodSlug } = useParams<{ neighborhoodSlug?: string }>();
   const neighborhood = getNeighborhoodBySlug(neighborhoodSlug);
   const options = usePropertyOptions();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Filter States (initialized from route or URL query params)
+  const [selectedType, setSelectedType] = useState(() => searchParams.get('type') || 'Todos');
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get('category') || 'Todos'
+  );
+  const [selectedZone, setSelectedZone] = useState(() => {
+    if (neighborhood?.filterType === 'zone') return neighborhood.filterValue;
+    return searchParams.get('zone') || 'Todas';
+  });
+  const [selectedLocation, setSelectedLocation] = useState(() => {
+    if (neighborhood?.filterType === 'location') return neighborhood.filterValue;
+    return searchParams.get('location') || 'Todos os Bairros';
+  });
 
   const [properties, setProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [totalCount, setTotalCount] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchParams] = useSearchParams();
 
-  // Filter States
-  const [selectedType, setSelectedType] = useState('Todos');
-  const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [selectedZone, setSelectedZone] = useState('Todas');
-  const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
+  const availableLocations = useMemo(
+    () => getLocationsForZone(selectedZone, options.locations),
+    [selectedZone, options.locations]
+  );
 
-  const applyFilters = () => {
-    let filtered = properties;
-
-    if (selectedType !== 'Todos') {
-      filtered = filtered.filter((p) => p.type === selectedType);
-    }
-
-    if (selectedCategory !== 'Todos') {
-      filtered = filtered.filter((p) => p.category === selectedCategory);
-    }
-
-    if (selectedZone !== 'Todas') {
-      filtered = filtered.filter((p) => p.zone === selectedZone);
-    }
-
-    if (selectedLocation !== 'Todos os Bairros') {
-      filtered = filtered.filter((p) => {
-        if (selectedLocation === 'Zona Portuária e Centro') {
-          return (
-            p.location.includes('Centro') ||
-            p.location.includes('Santo Cristo') ||
-            p.zone === 'Porto Maravilha' ||
-            p.zone === 'Zona Portuária'
-          );
-        }
-        return p.location.includes(selectedLocation);
-      });
-    }
-
-    setFilteredProperties(filtered);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    applyFilters();
-  };
-
+  // Sync filters when navigating between /imoveis and /imoveis/:neighborhoodSlug or URL changes
   useEffect(() => {
     if (neighborhood) {
       setSelectedType('Todos');
@@ -74,47 +69,180 @@ const Properties: React.FC = () => {
         setSelectedZone('Todas');
         setSelectedLocation(neighborhood.filterValue);
       }
+      setPage(1);
       return;
     }
 
-    const typeParam = searchParams.get('type');
-    const categoryParam = searchParams.get('category');
-    const locationParam = searchParams.get('location');
-    const zoneParam = searchParams.get('zone');
+    const typeParam = searchParams.get('type') || 'Todos';
+    const categoryParam = searchParams.get('category') || 'Todos';
+    const zoneParam = searchParams.get('zone') || 'Todas';
+    const rawLocationParam = searchParams.get('location') || 'Todos os Bairros';
+    const compatibleLocation = isLocationCompatibleWithZone(
+      rawLocationParam,
+      zoneParam,
+      options.locations
+    )
+      ? rawLocationParam
+      : 'Todos os Bairros';
 
-    setSelectedType(typeParam || 'Todos');
-    setSelectedCategory(categoryParam || 'Todos');
-    setSelectedLocation(locationParam || 'Todos os Bairros');
-    setSelectedZone(zoneParam || 'Todas');
-  }, [neighborhood, searchParams]);
+    setSelectedType(typeParam);
+    setSelectedCategory(categoryParam);
+    setSelectedZone(zoneParam);
+    setSelectedLocation(compatibleLocation);
+    setPage(1);
+  }, [neighborhood, searchParams, options.locations]);
 
-  useEffect(() => {
-    if (properties.length > 0) {
-      applyFilters();
+  const syncUrlParams = (
+    nextType: string,
+    nextCategory: string,
+    nextZone: string,
+    nextLocation: string
+  ) => {
+    if (neighborhood) return;
+    const params = new URLSearchParams();
+    if (nextType !== 'Todos') params.set('type', nextType);
+    if (nextCategory !== 'Todos') params.set('category', nextCategory);
+    if (nextZone !== 'Todas') params.set('zone', nextZone);
+    if (nextLocation !== 'Todos os Bairros') params.set('location', nextLocation);
+    setSearchParams(params, { replace: true });
+  };
+
+  const handleZoneChange = (nextZone: string) => {
+    const nextLocation = isLocationCompatibleWithZone(
+      selectedLocation,
+      nextZone,
+      options.locations
+    )
+      ? selectedLocation
+      : 'Todos os Bairros';
+
+    setSelectedZone(nextZone);
+    setSelectedLocation(nextLocation);
+    setPage(1);
+    syncUrlParams(selectedType, selectedCategory, nextZone, nextLocation);
+  };
+
+  const handleTypeChange = (nextType: string) => {
+    setSelectedType(nextType);
+    setPage(1);
+    syncUrlParams(nextType, selectedCategory, selectedZone, selectedLocation);
+  };
+
+  const handleCategoryChange = (nextCategory: string) => {
+    setSelectedCategory(nextCategory);
+    setPage(1);
+    syncUrlParams(selectedType, nextCategory, selectedZone, selectedLocation);
+  };
+
+  const handleLocationChange = (nextLocation: string) => {
+    setSelectedLocation(nextLocation);
+    setPage(1);
+    syncUrlParams(selectedType, selectedCategory, selectedZone, nextLocation);
+  };
+
+  const handleClearFilters = () => {
+    setSelectedType('Todos');
+    setSelectedCategory('Todos');
+    setSelectedZone('Todas');
+    setSelectedLocation('Todos os Bairros');
+    setPage(1);
+    if (!neighborhood) {
+      setSearchParams({}, { replace: true });
     }
-  }, [properties, selectedType, selectedCategory, selectedLocation, selectedZone]);
+  };
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const fetchProperties = async () => {
-      try {
-        const { data, error } = await supabase.from('properties').select('*');
+  const fetchProperties = useCallback(
+    async (targetPage: number, append: boolean) => {
+      if (append) {
+        setLoadingMore(true);
+      } else {
+        setLoading(true);
+      }
+      setError(null);
 
-        if (error) throw error;
+      const from = (targetPage - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
 
-        if (data) {
-          setProperties(data as Property[]);
+      const buildQuery = (filterPublished: boolean) => {
+        let query = supabase
+          .from('properties')
+          .select(CARD_COLUMNS, { count: 'exact' });
+
+        if (filterPublished) {
+          query = query.eq('published', true);
         }
+
+        if (selectedType !== 'Todos') {
+          query = query.eq('type', selectedType);
+        }
+
+        if (selectedCategory !== 'Todos') {
+          query = query.eq('category', selectedCategory);
+        }
+
+        if (selectedZone !== 'Todas') {
+          query = query.eq('zone', selectedZone);
+        }
+
+        if (selectedLocation !== 'Todos os Bairros') {
+          if (selectedLocation === 'Zona Portuária e Centro') {
+            query = query.or(
+              'location.ilike.%Centro%,location.ilike.%Santo Cristo%,zone.eq.Porto Maravilha,zone.eq.Zona Portuária'
+            );
+          } else {
+            query = query.ilike('location', `%${selectedLocation}%`);
+          }
+        }
+
+        return query.range(from, to);
+      };
+
+      try {
+        const result = await withRetry(async () => {
+          const res = await buildQuery(true);
+          if (res.error && res.error.code === '42703') {
+            const fallback = await buildQuery(false);
+            if (fallback.error) throw fallback.error;
+            return fallback;
+          }
+          if (res.error) throw res.error;
+          return res;
+        });
+
+        const rows = (result.data ?? []) as Property[];
+        setProperties((prev) => (append ? [...prev, ...rows] : rows));
+        setTotalCount(result.count ?? rows.length);
       } catch (err) {
-        console.error('Error fetching properties:', err);
+        console.error('Error fetching catalog properties:', err);
         setError('Não foi possível carregar os imóveis no momento.');
       } finally {
         setLoading(false);
+        setLoadingMore(false);
       }
-    };
+    },
+    [selectedType, selectedCategory, selectedZone, selectedLocation]
+  );
 
-    fetchProperties();
-  }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [neighborhoodSlug]);
+
+  useEffect(() => {
+    fetchProperties(1, false);
+  }, [fetchProperties]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchProperties(nextPage, true);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    syncUrlParams(selectedType, selectedCategory, selectedZone, selectedLocation);
+    fetchProperties(1, false);
+  };
 
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
@@ -144,6 +272,8 @@ const Properties: React.FC = () => {
         : []),
     ],
   };
+
+  const hasMore = properties.length < totalCount;
 
   return (
     <main id="conteudo-principal" className="bg-pearl min-h-screen pt-32 pb-20">
@@ -216,10 +346,10 @@ const Properties: React.FC = () => {
                   id="filter-type"
                   name="type"
                   value={selectedType}
-                  onChange={(e) => setSelectedType(e.target.value)}
+                  onChange={(e) => handleTypeChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
-                  <option value="Todos">Todos</option>
+                  <option value="Todos">Todas</option>
                   {options.types.map((t) => (
                     <option key={t} value={t}>
                       {t}
@@ -252,10 +382,10 @@ const Properties: React.FC = () => {
                   id="filter-category"
                   name="category"
                   value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
-                  <option value="Todos">Todos</option>
+                  <option value="Todos">Todas as Categorias</option>
                   {options.categories.map((cat) => (
                     <option key={cat} value={cat}>
                       {cat}
@@ -288,10 +418,10 @@ const Properties: React.FC = () => {
                   id="filter-zone"
                   name="zone"
                   value={selectedZone}
-                  onChange={(e) => setSelectedZone(e.target.value)}
+                  onChange={(e) => handleZoneChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
-                  <option value="Todas">Selecione a Zona</option>
+                  <option value="Todas">Todas as Zonas</option>
                   {options.zones.map((z) => (
                     <option key={z} value={z}>
                       {z}
@@ -324,11 +454,11 @@ const Properties: React.FC = () => {
                   id="filter-location"
                   name="location"
                   value={selectedLocation}
-                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  onChange={(e) => handleLocationChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
                   <option value="Todos os Bairros">Todos os Bairros</option>
-                  {options.locations.map((loc) => (
+                  {availableLocations.map((loc) => (
                     <option key={loc} value={loc}>
                       {loc}
                     </option>
@@ -356,7 +486,7 @@ const Properties: React.FC = () => {
         </form>
 
         {/* Internal Links to SEO Neighborhood Pages */}
-        <nav aria-label="Explorar imóveis por bairro e região" className="mb-12">
+        <nav aria-label="Explorar imóveis por bairro e região" className="mb-8">
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-widest text-gray-600 mr-2">
               Regiões:
@@ -387,6 +517,29 @@ const Properties: React.FC = () => {
           </div>
         </nav>
 
+        {/* Result summary */}
+        {!loading && !error && (
+          <div className="flex items-center justify-between mb-6 text-xs text-gray-600 font-medium">
+            <span>
+              {totalCount === 0
+                ? 'Nenhum imóvel encontrado'
+                : `Exibindo ${properties.length} de ${totalCount} ${totalCount === 1 ? 'imóvel' : 'imóveis'}`}
+            </span>
+            {(selectedType !== 'Todos' ||
+              selectedCategory !== 'Todos' ||
+              selectedZone !== 'Todas' ||
+              selectedLocation !== 'Todos os Bairros') && (
+              <button
+                type="button"
+                onClick={handleClearFilters}
+                className="text-gold-dark font-bold hover:underline"
+              >
+                Limpar filtros
+              </button>
+            )}
+          </div>
+        )}
+
         {loading ? (
           <div
             role="status"
@@ -411,32 +564,52 @@ const Properties: React.FC = () => {
             <span className="sr-only">Carregando todos os imóveis...</span>
           </div>
         ) : error ? (
-          <div role="alert" className="text-center py-10 text-red-700 font-medium">
-            {error}
+          <div
+            role="alert"
+            className="text-center py-14 px-6 bg-white rounded-sm border border-gray-200 shadow-sm space-y-4"
+          >
+            <p className="text-red-700 font-medium text-base">{error}</p>
+            <button
+              type="button"
+              onClick={() => fetchProperties(1, false)}
+              className="inline-flex items-center gap-2 bg-navy hover:bg-navy/90 text-white text-xs font-bold uppercase tracking-widest px-6 py-3 rounded-sm transition-colors"
+            >
+              <RefreshCw size={15} aria-hidden="true" />
+              Tentar novamente
+            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {filteredProperties.length > 0 ? (
-              filteredProperties.map((prop) => <PropertyCard key={prop.id} property={prop} />)
-            ) : (
-              <div className="col-span-full text-center py-20 text-gray-700">
-                <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              {properties.length > 0 ? (
+                properties.map((prop) => <PropertyCard key={prop.id} property={prop} />)
+              ) : (
+                <div className="col-span-full text-center py-20 text-gray-700 bg-white rounded-sm border border-gray-100">
+                  <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
+                  <button
+                    type="button"
+                    onClick={handleClearFilters}
+                    className="text-gold-dark font-bold mt-4 hover:underline"
+                  >
+                    Limpar filtros
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {hasMore && (
+              <div className="mt-12 text-center">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedType('Todos');
-                    setSelectedCategory('Todos');
-                    setSelectedZone('Todas');
-                    setSelectedLocation('Todos os Bairros');
-                    setFilteredProperties(properties);
-                  }}
-                  className="text-gold-dark font-bold mt-4 hover:underline"
+                  onClick={handleLoadMore}
+                  disabled={loadingMore}
+                  className="bg-navy hover:bg-navy/90 text-white font-bold uppercase tracking-widest text-xs px-8 py-4 rounded-sm shadow-lg transition-colors disabled:opacity-60"
                 >
-                  Limpar filtros
+                  {loadingMore ? 'Carregando mais imóveis...' : 'Carregar mais imóveis'}
                 </button>
               </div>
             )}
-          </div>
+          </>
         )}
       </div>
     </main>

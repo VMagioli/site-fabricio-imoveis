@@ -136,8 +136,11 @@ insert into public.property_options (group_name, label, sort_order) values
 on conflict (group_name, label) do nothing;
 
 -- ============================================================================
--- 5. RLS NA TABELA PROPERTIES (IMÓVEIS)
+-- 5. COLUNA PUBLISHED (RASCUNHOS) & RLS NA TABELA PROPERTIES
 -- ============================================================================
+alter table public.properties
+  add column if not exists published boolean not null default true;
+
 alter table public.properties enable row level security;
 
 drop policy if exists "Leitura publica de imoveis" on public.properties;
@@ -145,7 +148,7 @@ create policy "Leitura publica de imoveis"
   on public.properties
   for select
   to anon, authenticated
-  using (true);
+  using (published = true or public.is_admin());
 
 drop policy if exists "Somente admin insere imoveis" on public.properties;
 create policy "Somente admin insere imoveis"
@@ -170,8 +173,46 @@ create policy "Somente admin exclui imoveis"
   using (public.is_admin());
 
 -- ============================================================================
--- 6. RLS NAS TABELAS LEADS E NEWSLETTER (PROTEÇÃO LGPD)
+-- 6. RLS & VALIDAÇÃO NO SERVIDOR EM LEADS E NEWSLETTER (PROTEÇÃO LGPD + ANTIABUSO)
 -- ============================================================================
+do $$
+begin
+  if not exists (
+    select 1 from pg_constraint where conname = 'leads_name_length_chk'
+  ) then
+    alter table public.leads
+      add constraint leads_name_length_chk
+      check (char_length(trim(name)) between 3 and 120) not valid;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'leads_contact_length_chk'
+  ) then
+    alter table public.leads
+      add constraint leads_contact_length_chk
+      check (char_length(trim(contact)) between 10 and 160) not valid;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'leads_message_length_chk'
+  ) then
+    alter table public.leads
+      add constraint leads_message_length_chk
+      check (message is null or char_length(message) <= 4000) not valid;
+  end if;
+
+  if not exists (
+    select 1 from pg_constraint where conname = 'newsletter_email_format_chk'
+  ) then
+    alter table public.newsletter
+      add constraint newsletter_email_format_chk
+      check (
+        char_length(trim(email)) <= 254
+        and trim(email) ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+      ) not valid;
+  end if;
+end $$;
+
 alter table public.leads enable row level security;
 
 drop policy if exists "Visitante envia lead" on public.leads;
@@ -179,7 +220,10 @@ create policy "Visitante envia lead"
   on public.leads
   for insert
   to anon, authenticated
-  with check (true);
+  with check (
+    char_length(trim(name)) between 3 and 120
+    and char_length(trim(contact)) between 10 and 160
+  );
 
 drop policy if exists "Somente admin le leads" on public.leads;
 create policy "Somente admin le leads"
@@ -202,7 +246,10 @@ create policy "Visitante assina newsletter"
   on public.newsletter
   for insert
   to anon, authenticated
-  with check (true);
+  with check (
+    char_length(trim(email)) <= 254
+    and trim(email) ~* '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+  );
 
 drop policy if exists "Somente admin le newsletter" on public.newsletter;
 create policy "Somente admin le newsletter"

@@ -1,11 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, MessageCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { NAV_LINKS } from '../constants';
 
 const Header: React.FC = () => {
+  const location = useLocation();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Apenas a Home ("/") e fichas de imóvel ("/imovel/...") têm topo escuro;
+  // páginas de fundo claro (/imoveis, /contato, /politica-de-privacidade) usam header sólido.
+  const hasDarkHero =
+    location.pathname === '/' || location.pathname.startsWith('/imovel/');
+  const useSolidBg = isScrolled || !hasDarkHero || mobileMenuOpen;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -15,10 +23,28 @@ const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fecha menu mobile ao navegar para outra rota
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname, location.hash]);
+
+  // Fecha menu mobile ao pressionar Esc e devolve foco ao botão
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        menuButtonRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-navy py-4 shadow-xl' : 'bg-navy/75 md:bg-transparent py-4 md:py-6'
+        useSolidBg ? 'bg-navy py-4 shadow-xl' : 'bg-navy/75 md:bg-transparent py-4 md:py-6'
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -56,6 +82,7 @@ const Header: React.FC = () => {
 
         {/* Mobile Toggle */}
         <button
+          ref={menuButtonRef}
           type="button"
           className="md:hidden text-white p-2 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
           onClick={() => setMobileMenuOpen((prev) => !prev)}

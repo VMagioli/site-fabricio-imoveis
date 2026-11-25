@@ -19,6 +19,7 @@ export interface Property {
   pet_friendly?: boolean;
   description?: string;
   features?: string[];
+  published?: boolean;
   created_at?: string;
 }
 

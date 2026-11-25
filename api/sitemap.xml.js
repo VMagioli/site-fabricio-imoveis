@@ -28,6 +28,34 @@ function escapeXml(str) {
     .replace(/'/g, '&apos;');
 }
 
+async function fetchPublishedProperties(supabaseUrl, supabaseKey) {
+  const headers = {
+    apikey: supabaseKey,
+    Authorization: `Bearer ${supabaseKey}`,
+  };
+
+  // Tenta consultar slug + published (sem depender de created_at, que pode não existir na tabela)
+  let response = await fetch(
+    `${supabaseUrl}/rest/v1/properties?select=slug,published`,
+    { headers }
+  );
+
+  // Fallback caso a coluna published ainda não tenha sido aplicada na migration
+  if (!response.ok) {
+    response = await fetch(`${supabaseUrl}/rest/v1/properties?select=slug`, { headers });
+  }
+
+  if (!response.ok) {
+    console.error('Sitemap properties fetch failed:', response.status, await response.text());
+    return [];
+  }
+
+  const data = await response.json();
+  if (!Array.isArray(data)) return [];
+
+  return data.filter((item) => item && item.slug && item.published !== false);
+}
+
 export default async function handler(req, res) {
   const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
   const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
@@ -36,22 +64,7 @@ export default async function handler(req, res) {
 
   if (SUPABASE_URL && SUPABASE_KEY) {
     try {
-      const response = await fetch(
-        `${SUPABASE_URL}/rest/v1/properties?select=slug,created_at&order=created_at.desc`,
-        {
-          headers: {
-            apikey: SUPABASE_KEY,
-            Authorization: `Bearer ${SUPABASE_KEY}`,
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (Array.isArray(data)) {
-          properties = data.filter((item) => item && item.slug);
-        }
-      }
+      properties = await fetchPublishedProperties(SUPABASE_URL, SUPABASE_KEY);
     } catch (error) {
       console.error('Error fetching properties for sitemap:', error);
     }
@@ -73,16 +86,13 @@ export default async function handler(req, res) {
   </url>`
   );
 
-  const propertyUrls = properties.map((prop) => {
-    const lastmod = prop.created_at
-      ? `\n    <lastmod>${new Date(prop.created_at).toISOString().split('T')[0]}</lastmod>`
-      : '';
-    return `  <url>
-    <loc>${SITE_URL}/imovel/${escapeXml(encodeURIComponent(prop.slug))}</loc>${lastmod}
+  const propertyUrls = properties.map(
+    (prop) => `  <url>
+    <loc>${SITE_URL}/imovel/${escapeXml(encodeURIComponent(prop.slug))}</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
-  </url>`;
-  });
+  </url>`
+  );
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">

@@ -68,10 +68,18 @@ const PrivacyPolicy: React.FC = () => {
 
         <h2 className="text-2xl font-serif text-gold-dark mt-8 mb-4">5. Compartilhamento e Segurança</h2>
         <p className="mb-4">
-          Seus dados pessoais não são compartilhados com terceiros, salvo obrigação legal.
+          Seus dados pessoais não são vendidos nem compartilhados com terceiros para fins comerciais, salvo obrigação legal ou quando estritamente necessários para a prestação do atendimento solicitado por você:
         </p>
+        <ul className="list-disc pl-6 mb-4 space-y-1">
+          <li>
+            <strong>WhatsApp (Meta):</strong> quando você opta por iniciar ou concluir o contato pelo WhatsApp nos formulários do site, os dados preenchidos são encaminhados diretamente à conversa com o corretor.
+          </li>
+          <li>
+            <strong>Infraestrutura de armazenamento (Supabase):</strong> os dados enviados no agendamento de visitas e na newsletter são armazenados em banco de dados protegido com controle de acesso restrito ao administrador.
+          </li>
+        </ul>
         <p className="mb-4">
-          Adotamos medidas técnicas (como senhas fortes e ambientes protegidos) para proteger seus dados contra acessos não autorizados. Os dados são mantidos pelo tempo necessário para fornecer os serviços solicitados.
+          Adotamos medidas técnicas (como criptografia em trânsito via HTTPS, controle de acesso por autenticação e políticas de segurança no banco de dados) para proteger seus dados contra acessos não autorizados. Os dados são mantidos pelo tempo necessário para fornecer os serviços solicitados.
         </p>
 
         <h2 className="text-2xl font-serif text-gold-dark mt-8 mb-4">6. Direitos do Titular</h2>
