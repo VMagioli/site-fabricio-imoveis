@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Menu, X, MessageCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -12,28 +11,29 @@ const Header: React.FC = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-navy py-4 shadow-xl' : 'bg-transparent py-6'
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-navy py-4 shadow-xl' : 'bg-navy/75 md:bg-transparent py-4 md:py-6'
+      }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex flex-col">
+        <Link to="/" className="flex flex-col" aria-label="Fabrício Magioli — Página inicial">
           <span className="font-serif text-2xl font-bold text-white tracking-widest uppercase">
             Fabrício <span className="text-gold">Magioli</span>
           </span>
-          <span className="text-[10px] text-pearl/60 tracking-[0.2em] font-light uppercase">
+          <span className="text-[10px] text-pearl/85 tracking-[0.2em] font-light uppercase">
             Imóveis e Oportunidades
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav aria-label="Navegação principal" className="hidden md:flex items-center space-x-8">
           {NAV_LINKS.map((link) => (
             <Link
               key={link.label}
@@ -47,45 +47,56 @@ const Header: React.FC = () => {
             href="https://wa.me/5521990132992"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 bg-gold hover:bg-gold/80 text-navy font-bold py-3 px-6 rounded-sm transition-all shadow-lg text-sm uppercase tracking-tighter"
+            className="flex items-center gap-2 bg-gold hover:bg-gold/90 text-navy font-bold py-3 px-6 rounded-sm transition-all shadow-lg text-sm uppercase tracking-tighter"
           >
-            <MessageCircle size={18} />
+            <MessageCircle size={18} aria-hidden="true" />
             Fale comigo
           </a>
         </nav>
 
         {/* Mobile Toggle */}
         <button
-          className="md:hidden text-white p-2"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          type="button"
+          className="md:hidden text-white p-2 rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-gold"
+          onClick={() => setMobileMenuOpen((prev) => !prev)}
+          aria-label={mobileMenuOpen ? 'Fechar menu de navegação' : 'Abrir menu de navegação'}
+          aria-expanded={mobileMenuOpen}
+          aria-controls="mobile-navigation"
         >
-          {mobileMenuOpen ? <X size={32} /> : <Menu size={32} />}
+          {mobileMenuOpen ? <X size={32} aria-hidden="true" /> : <Menu size={32} aria-hidden="true" />}
         </button>
       </div>
 
       {/* Mobile Menu */}
-      <div className={`md:hidden absolute top-full left-0 w-full bg-navy border-t border-white/10 transition-transform duration-300 ${mobileMenuOpen ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
-        }`}>
-        <div className="flex flex-col p-6 space-y-6">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              to={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-white text-lg font-medium tracking-wide uppercase"
+      {mobileMenuOpen && (
+        <nav
+          id="mobile-navigation"
+          aria-label="Navegação móvel"
+          className="md:hidden absolute top-full left-0 w-full bg-navy border-t border-white/10 shadow-2xl"
+        >
+          <div className="flex flex-col p-6 space-y-6">
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.label}
+                to={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-white hover:text-gold text-lg font-medium tracking-wide uppercase transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+            <a
+              href="https://wa.me/5521990132992"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 bg-gold text-navy font-bold py-4 rounded-sm"
             >
-              {link.label}
-            </Link>
-          ))}
-          <a
-            href="https://wa.me/5521990132992"
-            className="flex items-center justify-center gap-2 bg-gold text-navy font-bold py-4 rounded-sm"
-          >
-            <MessageCircle size={20} />
-            WhatsApp
-          </a>
-        </div>
-      </div>
+              <MessageCircle size={20} aria-hidden="true" />
+              WhatsApp
+            </a>
+          </div>
+        </nav>
+      )}
     </header>
   );
 };

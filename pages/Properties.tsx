@@ -1,215 +1,411 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
-import { Link, useSearchParams } from 'react-router-dom';
-import { BedDouble, Bath, Square, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import { ArrowLeft, Search, MapPin, Building, ChevronDown, Map, Check } from 'lucide-react';
 import SEO from '../components/SEO';
-
-import { Search, MapPin, Building, ChevronDown, Map } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
+import { NEIGHBORHOODS, getNeighborhoodBySlug } from '../src/data/neighborhoods';
 
 const Properties: React.FC = () => {
-    const [properties, setProperties] = useState<Property[]>([]);
-    const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [searchParams] = useSearchParams();
+  const { neighborhoodSlug } = useParams<{ neighborhoodSlug?: string }>();
+  const neighborhood = getNeighborhoodBySlug(neighborhoodSlug);
 
-    // Filter States
-    const [selectedCategory, setSelectedCategory] = useState('Todos');
-    const [selectedZone, setSelectedZone] = useState('Todas');
-    const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
 
-    const handleSearch = () => {
-        let filtered = properties;
+  // Filter States
+  const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [selectedZone, setSelectedZone] = useState('Todas');
+  const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
 
-        if (selectedCategory !== 'Todos') {
-            filtered = filtered.filter(p => p.category === selectedCategory);
+  const applyFilters = () => {
+    let filtered = properties;
+
+    if (selectedCategory !== 'Todos') {
+      filtered = filtered.filter((p) => p.category === selectedCategory);
+    }
+
+    if (selectedZone !== 'Todas') {
+      filtered = filtered.filter((p) => p.zone === selectedZone);
+    }
+
+    if (selectedLocation !== 'Todos os Bairros') {
+      filtered = filtered.filter((p) => {
+        if (selectedLocation === 'Zona Portuária e Centro') {
+          return (
+            p.location.includes('Centro') ||
+            p.location.includes('Santo Cristo') ||
+            p.zone === 'Porto Maravilha' ||
+            p.zone === 'Zona Portuária'
+          );
         }
+        return p.location.includes(selectedLocation);
+      });
+    }
 
-        if (selectedZone !== 'Todas') {
-            filtered = filtered.filter(p => p.zone === selectedZone);
+    setFilteredProperties(filtered);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    applyFilters();
+  };
+
+  useEffect(() => {
+    if (neighborhood) {
+      setSelectedCategory('Todos');
+      if (neighborhood.filterType === 'zone') {
+        setSelectedZone(neighborhood.filterValue);
+        setSelectedLocation('Todos os Bairros');
+      } else {
+        setSelectedZone('Todas');
+        setSelectedLocation(neighborhood.filterValue);
+      }
+      return;
+    }
+
+    const categoryParam = searchParams.get('category');
+    const locationParam = searchParams.get('location');
+    const zoneParam = searchParams.get('zone');
+
+    setSelectedCategory(categoryParam || 'Todos');
+    setSelectedLocation(locationParam || 'Todos os Bairros');
+    setSelectedZone(zoneParam || 'Todas');
+  }, [neighborhood, searchParams]);
+
+  useEffect(() => {
+    if (properties.length > 0) {
+      applyFilters();
+    }
+  }, [properties, selectedCategory, selectedLocation, selectedZone]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const fetchProperties = async () => {
+      try {
+        const { data, error } = await supabase.from('properties').select('*');
+
+        if (error) throw error;
+
+        if (data) {
+          setProperties(data as Property[]);
         }
-
-        if (selectedLocation !== 'Todos os Bairros') {
-            filtered = filtered.filter(p => p.location.includes(selectedLocation === 'Zona Portuária e Centro' ? 'Centro' : selectedLocation));
-        }
-
-        setFilteredProperties(filtered);
+      } catch (err) {
+        console.error('Error fetching properties:', err);
+        setError('Não foi possível carregar os imóveis no momento.');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    useEffect(() => {
-        // Initialize filters from URL
-        const categoryParam = searchParams.get('category');
-        const locationParam = searchParams.get('location');
-        const zoneParam = searchParams.get('zone');
+    fetchProperties();
+  }, []);
 
-        if (categoryParam) setSelectedCategory(categoryParam);
-        if (locationParam) setSelectedLocation(locationParam);
-        if (zoneParam) setSelectedZone(zoneParam);
-    }, [searchParams]);
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Início',
+        item: 'https://www.fabriciomagioli.com.br/',
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Imóveis',
+        item: 'https://www.fabriciomagioli.com.br/imoveis',
+      },
+      ...(neighborhood
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: neighborhood.name,
+              item: `https://www.fabriciomagioli.com.br/imoveis/${neighborhood.slug}`,
+            },
+          ]
+        : []),
+    ],
+  };
 
-    useEffect(() => {
-        // Run filter when properties or filters change
-        if (properties.length > 0) {
-            handleSearch();
+  return (
+    <main id="conteudo-principal" className="bg-pearl min-h-screen pt-32 pb-20">
+      <SEO
+        title={neighborhood ? neighborhood.title : 'Catálogo de Imóveis no Rio de Janeiro'}
+        description={
+          neighborhood
+            ? neighborhood.metaDescription
+            : 'Encontre seu novo lar no Rio de Janeiro. Seleção de apartamentos, casas e terrenos com atendimento consultivo e financiamento facilitado.'
         }
-    }, [properties, selectedCategory, selectedLocation, selectedZone]);
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbJsonLd)}</script>
+      </Helmet>
 
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        const fetchProperties = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('properties')
-                    .select('*');
+      <div className="container mx-auto px-6">
+        <div className="mb-12">
+          <Link
+            to={neighborhood ? '/imoveis' : '/'}
+            className="text-navy/80 hover:text-gold-dark transition-colors inline-flex items-center gap-2 mb-6 uppercase tracking-widest text-xs font-medium"
+          >
+            <ArrowLeft size={14} aria-hidden="true" />
+            {neighborhood ? 'Ver todos os imóveis' : 'Voltar para Início'}
+          </Link>
+          <h1 className="font-serif text-4xl md:text-5xl text-navy mb-4">
+            {neighborhood ? neighborhood.h1 : 'Nosso Portfólio Completo'}
+          </h1>
+          <div className="w-20 h-1 bg-gold mb-6" aria-hidden="true" />
 
-                if (error) throw error;
-
-                if (data) {
-                    setProperties(data as Property[]);
-                    // We don't set filteredProperties here immediately because the 
-                    // useEffect above will handle it based on current filters/URL
-                }
-            } catch (err) {
-                console.error('Error fetching properties:', err);
-                setError('Não foi possível carregar os imóveis no momento.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchProperties();
-    }, []);
-
-    return (
-        <div className="bg-pearl min-h-screen pt-32 pb-20">
-            <SEO
-                title="Imóveis de Alto Padrão"
-                description="Encontre seu novo lar no Rio de Janeiro. Seleção exclusiva de imóveis de luxo com atendimento personalizado."
-                image="/og-image.jpg"
-                url={window.location.href}
-            />
-            <div className="container mx-auto px-6">
-                <div className="mb-12">
-                    <Link to="/" className="text-navy/60 hover:text-gold transition-colors inline-flex items-center gap-2 mb-6 uppercase tracking-widest text-xs">
-                        <ArrowLeft size={14} />
-                        Voltar para Início
-                    </Link>
-                    <h1 className="font-serif text-4xl md:text-5xl text-navy mb-4">Nosso Portfólio Completo</h1>
-                    <div className="w-20 h-1 bg-gold"></div>
-                </div>
-
-                {/* Search Filters */}
-                <div className="bg-white rounded-sm shadow-xl p-6 mb-12 -mt-6 border border-gray-100">
-                    <div className="flex flex-col md:flex-row items-end gap-6">
-
-                        {/* Category Filter */}
-                        <div className="w-full md:w-1/4">
-                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Pretensão/Tipo</label>
-                            <div className="relative">
-                                <Building className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
-                                <select
-                                    value={selectedCategory}
-                                    onChange={(e) => setSelectedCategory(e.target.value)}
-                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
-                                >
-                                    <option value="Todos">Todos</option>
-                                    <option value="Apartamento">Apartamento</option>
-                                    <option value="Casa">Casa</option>
-                                    <option value="Terreno">Terreno</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
-                            </div>
-                        </div>
-
-                        {/* Zone Filter */}
-                        <div className="w-full md:w-1/4">
-                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Zona</label>
-                            <div className="relative">
-                                <Map className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
-                                <select
-                                    value={selectedZone}
-                                    onChange={(e) => setSelectedZone(e.target.value)}
-                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
-                                >
-                                    <option value="Todas">Selecione a Zona</option>
-                                    <option value="Zona Oeste">Zona Oeste</option>
-                                    <option value="Zona Norte">Zona Norte</option>
-                                    <option value="Zona Sul">Zona Sul</option>
-                                    <option value="Zona Portuária">Zona Portuária</option>
-                                    <option value="Zona Sudoeste">Zona Sudoeste</option>
-                                    <option value="Centro">Centro</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
-                            </div>
-                        </div>
-
-                        {/* Neighborhood Filter */}
-                        <div className="w-full md:w-1/4">
-                            <label className="text-[10px] text-gold font-bold uppercase tracking-widest block mb-2">Bairro</label>
-                            <div className="relative">
-                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-gold" size={18} />
-                                <select
-                                    value={selectedLocation}
-                                    onChange={(e) => setSelectedLocation(e.target.value)}
-                                    className="w-full bg-pearl border-none py-3 pl-10 pr-4 rounded-sm text-dark font-medium appearance-none focus:ring-1 focus:ring-gold outline-none cursor-pointer"
-                                >
-                                    <option>Todos os Bairros</option>
-                                    <option>Campo Grande</option>
-                                    <option>Bangu</option>
-                                    <option>Santa Cruz</option>
-                                    <option>Zona Portuária e Centro</option>
-                                    <option>Recreio dos Bandeirantes</option>
-                                    <option>Barra da Tijuca</option>
-                                    <option>Niterói</option>
-                                    <option>Zona Norte</option>
-                                </select>
-                                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/40" size={16} />
-                            </div>
-                        </div>
-
-                        {/* Search Button */}
-                        <div className="w-full md:w-1/4">
-                            <button
-                                onClick={handleSearch}
-                                className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-3 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-1 active:translate-y-0"
-                            >
-                                <Search size={20} />
-                                <span className="uppercase text-sm tracking-widest">BUSCAR IMÓVEL</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                {loading ? (
-                    <div className="flex justify-center items-center py-20">
-                        <div className="text-navy font-serif text-xl animate-pulse">Carregando todos os imóveis...</div>
-                    </div>
-                ) : error ? (
-                    <div className="text-center py-10 text-red-500">{error}</div>
-                ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        {filteredProperties.length > 0 ? (
-                            filteredProperties.map((prop) => (
-                                <PropertyCard key={prop.id} property={prop} />
-                            ))
-                        ) : (
-                            <div className="col-span-3 text-center py-20 text-gray-500">
-                                <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
-                                <button
-                                    onClick={() => { setSelectedCategory('Todos'); setSelectedZone('Todas'); setSelectedLocation('Todos os Bairros'); setFilteredProperties(properties); }}
-                                    className="text-gold font-bold mt-4 hover:underline"
-                                >
-                                    Limpar filtros
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
+          {neighborhood && (
+            <div className="max-w-3xl space-y-4">
+              <p className="text-gray-700 text-base md:text-lg leading-relaxed">
+                {neighborhood.intro}
+              </p>
+              <ul className="flex flex-wrap gap-x-6 gap-y-2 pt-1">
+                {neighborhood.highlights.map((item) => (
+                  <li key={item} className="inline-flex items-center gap-2 text-sm text-navy font-medium">
+                    <Check size={16} className="text-gold-dark flex-shrink-0" aria-hidden="true" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
+          )}
         </div>
-    );
+
+        {/* Search Filters */}
+        <form
+          role="search"
+          aria-label="Filtrar catálogo de imóveis"
+          onSubmit={handleSubmit}
+          className="bg-white rounded-sm shadow-xl p-6 mb-10 border border-gray-100"
+        >
+          <div className="flex flex-col md:flex-row items-end gap-6">
+            {/* Category Filter */}
+            <div className="w-full md:w-1/4">
+              <label
+                htmlFor="filter-category"
+                className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
+              >
+                Pretensão / Tipo
+              </label>
+              <div className="relative">
+                <Building
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gold-dark pointer-events-none"
+                  size={18}
+                  aria-hidden="true"
+                />
+                <select
+                  id="filter-category"
+                  name="category"
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
+                >
+                  <option value="Todos">Todos</option>
+                  <option value="Apartamento">Apartamento</option>
+                  <option value="Casa">Casa</option>
+                  <option value="Terreno">Terreno</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+
+            {/* Zone Filter */}
+            <div className="w-full md:w-1/4">
+              <label
+                htmlFor="filter-zone"
+                className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
+              >
+                Zona
+              </label>
+              <div className="relative">
+                <Map
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gold-dark pointer-events-none"
+                  size={18}
+                  aria-hidden="true"
+                />
+                <select
+                  id="filter-zone"
+                  name="zone"
+                  value={selectedZone}
+                  onChange={(e) => setSelectedZone(e.target.value)}
+                  className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
+                >
+                  <option value="Todas">Selecione a Zona</option>
+                  <option value="Zona Oeste">Zona Oeste</option>
+                  <option value="Zona Norte">Zona Norte</option>
+                  <option value="Zona Sul">Zona Sul</option>
+                  <option value="Zona Portuária">Zona Portuária</option>
+                  <option value="Porto Maravilha">Porto Maravilha</option>
+                  <option value="Zona Sudoeste">Zona Sudoeste</option>
+                  <option value="Centro">Centro</option>
+                  <option value="Niterói">Niterói</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+
+            {/* Neighborhood Filter */}
+            <div className="w-full md:w-1/4">
+              <label
+                htmlFor="filter-location"
+                className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
+              >
+                Bairro
+              </label>
+              <div className="relative">
+                <MapPin
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gold-dark pointer-events-none"
+                  size={18}
+                  aria-hidden="true"
+                />
+                <select
+                  id="filter-location"
+                  name="location"
+                  value={selectedLocation}
+                  onChange={(e) => setSelectedLocation(e.target.value)}
+                  className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
+                >
+                  <option value="Todos os Bairros">Todos os Bairros</option>
+                  <option value="Bangu">Bangu</option>
+                  <option value="Barra da Tijuca">Barra da Tijuca</option>
+                  <option value="Barra Olímpica">Barra Olímpica</option>
+                  <option value="Cachambi">Cachambi</option>
+                  <option value="Campo Grande">Campo Grande</option>
+                  <option value="Centro">Centro</option>
+                  <option value="Irajá">Irajá</option>
+                  <option value="Niterói">Niterói</option>
+                  <option value="Olaria">Olaria</option>
+                  <option value="Recreio dos Bandeirantes">Recreio dos Bandeirantes</option>
+                  <option value="Rio Comprido">Rio Comprido</option>
+                  <option value="Santa Cruz">Santa Cruz</option>
+                  <option value="Santo Cristo">Santo Cristo</option>
+                  <option value="São Cristóvão">São Cristóvão</option>
+                  <option value="Taquara">Taquara</option>
+                  <option value="Zona Portuária e Centro">Zona Portuária e Centro</option>
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+
+            {/* Search Button */}
+            <div className="w-full md:w-1/4">
+              <button
+                type="submit"
+                className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-3 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
+              >
+                <Search size={20} aria-hidden="true" />
+                <span className="uppercase text-sm tracking-widest">Buscar Imóvel</span>
+              </button>
+            </div>
+          </div>
+        </form>
+
+        {/* Internal Links to SEO Neighborhood Pages */}
+        <nav aria-label="Explorar imóveis por bairro e região" className="mb-12">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-bold uppercase tracking-widest text-gray-600 mr-2">
+              Regiões:
+            </span>
+            <Link
+              to="/imoveis"
+              className={`text-xs font-semibold px-3 py-1.5 rounded-sm border transition-colors ${
+                !neighborhood
+                  ? 'bg-navy text-white border-navy'
+                  : 'bg-white text-navy border-gray-200 hover:border-gold-dark hover:text-gold-dark'
+              }`}
+            >
+              Todos
+            </Link>
+            {NEIGHBORHOODS.map((item) => (
+              <Link
+                key={item.slug}
+                to={`/imoveis/${item.slug}`}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-sm border transition-colors ${
+                  neighborhood?.slug === item.slug
+                    ? 'bg-navy text-white border-navy'
+                    : 'bg-white text-navy border-gray-200 hover:border-gold-dark hover:text-gold-dark'
+                }`}
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </nav>
+
+        {loading ? (
+          <div
+            role="status"
+            aria-label="Carregando catálogo de imóveis"
+            className="grid grid-cols-1 md:grid-cols-3 gap-10"
+          >
+            {[0, 1, 2, 3, 4, 5].map((item) => (
+              <div
+                key={item}
+                className="bg-white rounded-sm overflow-hidden shadow-sm animate-pulse"
+                aria-hidden="true"
+              >
+                <div className="aspect-video w-full bg-gray-200" />
+                <div className="p-8 space-y-4">
+                  <div className="h-6 bg-gray-200 rounded w-4/5" />
+                  <div className="h-4 bg-gray-200 rounded w-1/2" />
+                  <div className="h-12 bg-gray-200 rounded w-full" />
+                  <div className="h-6 bg-gray-200 rounded w-1/3" />
+                </div>
+              </div>
+            ))}
+            <span className="sr-only">Carregando todos os imóveis...</span>
+          </div>
+        ) : error ? (
+          <div role="alert" className="text-center py-10 text-red-700 font-medium">
+            {error}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+            {filteredProperties.length > 0 ? (
+              filteredProperties.map((prop) => <PropertyCard key={prop.id} property={prop} />)
+            ) : (
+              <div className="col-span-full text-center py-20 text-gray-700">
+                <p className="text-lg">Nenhum imóvel encontrado com os critérios selecionados.</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('Todos');
+                    setSelectedZone('Todas');
+                    setSelectedLocation('Todos os Bairros');
+                    setFilteredProperties(properties);
+                  }}
+                  className="text-gold-dark font-bold mt-4 hover:underline"
+                >
+                  Limpar filtros
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </main>
+  );
 };
 
 export default Properties;

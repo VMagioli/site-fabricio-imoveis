@@ -1,71 +1,73 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="kStMrFrIWAuErj_crSCLl26X7Qk-wSZHIIOu41Wu6dI" />
-  <title>Fabrício Magioli | Imóveis</title>
-  <!-- Fonts: Playfair Display for Titles, Montserrat for Body -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <title>Fabrício Magioli | Imóveis no Rio de Janeiro</title>
+  <meta
+    name="description"
+    content="Saia do aluguel agora! Encontre apartamentos, casas e terrenos no Rio de Janeiro com Fabrício Magioli (CRECI-RJ 106924). Financiamento facilitado, uso de FGTS e subsídios do governo."
+    data-rh="true"
+  />
+  <meta name="theme-color" content="#0D1B2A" />
+
+  <!-- Preload LCP Hero Image -->
   <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
-    rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            navy: '#0D1B2A',
-            gold: '#EAB749',
-            royal: '#3E92CC',
-            dark: '#2D2D2D',
-            pearl: '#F8F9FA'
+    rel="preload"
+    as="image"
+    type="image/webp"
+    href="/images/hero-rj-desktop.webp"
+    imagesrcset="/images/hero-rj-mobile.webp 768w, /images/hero-rj-desktop.webp 1600w"
+    imagesizes="100vw"
+    fetchpriority="high"
+  />
+
+  <!-- AI Agent Discovery -->
+  <link rel="alternate" type="text/markdown" href="/llms.txt" />
+  <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
+  <link rel="ard" href="/.well-known/ard.json" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "RealEstateAgent",
+          "@id": "https://www.fabriciomagioli.com.br/#agent",
+          "name": "Fabrício Magioli Imóveis",
+          "url": "https://www.fabriciomagioli.com.br/",
+          "image": "https://www.fabriciomagioli.com.br/images/foto-fabricio-frente.webp",
+          "telephone": "+55-21-99013-2992",
+          "email": "magiolifabricio@gmail.com",
+          "areaServed": {
+            "@type": "City",
+            "name": "Rio de Janeiro",
+            "addressRegion": "RJ",
+            "addressCountry": "BR"
           },
-          fontFamily: {
-            serif: ['"Playfair Display"', 'serif'],
-            sans: ['Montserrat', 'sans-serif'],
+          "sameAs": [
+            "https://www.instagram.com/fabriciomagioli/",
+            "https://www.facebook.com/fabricio.magioli"
+          ],
+          "description": "Assessoria imobiliária consultiva no Rio de Janeiro (CRECI-RJ 106924), especialista na Zona Oeste, apartamentos, casas e terrenos com financiamento facilitado e uso de FGTS."
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://www.fabriciomagioli.com.br/#website",
+          "url": "https://www.fabriciomagioli.com.br/",
+          "name": "Fabrício Magioli | Imóveis no Rio de Janeiro",
+          "inLanguage": "pt-BR",
+          "publisher": {
+            "@id": "https://www.fabriciomagioli.com.br/#agent"
           }
         }
-      }
+      ]
     }
   </script>
-  <style>
-    body {
-      font-family: 'Montserrat', sans-serif;
-      color: #2D2D2D;
-      background-color: #F8F9FA;
-    }
-
-    .font-serif {
-      font-family: 'Playfair Display', serif;
-    }
-
-    .gold-gradient {
-      background: linear-gradient(135deg, #D4AF37 0%, #F4C430 100%);
-    }
-
-    .glass {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-  </style>
-  <script type="importmap">
-{
-  "imports": {
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/"
-  }
-}
-</script>
-  <link rel="stylesheet" href="/index.css">
 </head>
 
 <body>

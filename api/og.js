@@ -30,7 +30,7 @@ export default async function handler(req, res) {
         const title = `${property.title} | Fabrício Magioli`;
         const description = property.description?.substring(0, 160) || 'Confira este imóvel exclusivo.';
         const image = property.image && property.image[0] ? property.image[0] : '';
-        const url = `https://fabricio-magioli-imoveis-de-luxo.vercel.app/imovel/${slug}`;
+        const url = `https://www.fabriciomagioli.com.br/imovel/${slug}`;
 
         const html = `
       <!DOCTYPE html>

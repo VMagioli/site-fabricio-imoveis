@@ -1,0 +1,9 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "Fabrício Magioli — Imóveis no Rio de Janeiro",
+    "identifier": "did:web:www.fabriciomagioli.com.br",
+    "documentationUrl": "https://www.fabriciomagioli.com.br/llms.txt"
+  },
+  "entries": []
+}

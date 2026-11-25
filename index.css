@@ -1,17 +1,62 @@
-@keyframes scroll {
-    0% {
-        transform: translateX(0);
-    }
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-    100% {
-        transform: translateX(-50%);
-    }
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: #2D2D2D;
+    background-color: #F8F9FA;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.gold-gradient {
+  background: linear-gradient(135deg, #D4AF37 0%, #F4C430 100%);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.carbon-pattern {
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .animate-scroll {
-    animation: scroll 30s linear infinite;
+  animation: scroll 30s linear infinite;
 }
 
-html {
-    scroll-behavior: smooth;
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .animate-scroll {
+    animation: none;
+  }
 }

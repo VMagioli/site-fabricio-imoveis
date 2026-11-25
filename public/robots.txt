@@ -1,4 +1,5 @@
 User-agent: *
-Allow: / 
+Allow: /
 
 Sitemap: https://www.fabriciomagioli.com.br/sitemap.xml
+Agentmap: https://www.fabriciomagioli.com.br/.well-known/ai-catalog.json
