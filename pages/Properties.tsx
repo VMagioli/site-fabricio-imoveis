@@ -3,14 +3,16 @@ import { supabase } from '../src/lib/supabase';
 import { Property } from '../types';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, Search, MapPin, Building, ChevronDown, Map, Check } from 'lucide-react';
+import { ArrowLeft, Search, MapPin, Building, ChevronDown, Map, Check, Tag } from 'lucide-react';
 import SEO from '../components/SEO';
 import PropertyCard from '../components/PropertyCard';
 import { NEIGHBORHOODS, getNeighborhoodBySlug } from '../src/data/neighborhoods';
+import { usePropertyOptions } from '../src/hooks/usePropertyOptions';
 
 const Properties: React.FC = () => {
   const { neighborhoodSlug } = useParams<{ neighborhoodSlug?: string }>();
   const neighborhood = getNeighborhoodBySlug(neighborhoodSlug);
+  const options = usePropertyOptions();
 
   const [properties, setProperties] = useState<Property[]>([]);
   const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
@@ -19,12 +21,17 @@ const Properties: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   // Filter States
+  const [selectedType, setSelectedType] = useState('Todos');
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedZone, setSelectedZone] = useState('Todas');
   const [selectedLocation, setSelectedLocation] = useState('Todos os Bairros');
 
   const applyFilters = () => {
     let filtered = properties;
+
+    if (selectedType !== 'Todos') {
+      filtered = filtered.filter((p) => p.type === selectedType);
+    }
 
     if (selectedCategory !== 'Todos') {
       filtered = filtered.filter((p) => p.category === selectedCategory);
@@ -58,6 +65,7 @@ const Properties: React.FC = () => {
 
   useEffect(() => {
     if (neighborhood) {
+      setSelectedType('Todos');
       setSelectedCategory('Todos');
       if (neighborhood.filterType === 'zone') {
         setSelectedZone(neighborhood.filterValue);
@@ -69,10 +77,12 @@ const Properties: React.FC = () => {
       return;
     }
 
+    const typeParam = searchParams.get('type');
     const categoryParam = searchParams.get('category');
     const locationParam = searchParams.get('location');
     const zoneParam = searchParams.get('zone');
 
+    setSelectedType(typeParam || 'Todos');
     setSelectedCategory(categoryParam || 'Todos');
     setSelectedLocation(locationParam || 'Todos os Bairros');
     setSelectedZone(zoneParam || 'Todas');
@@ -82,7 +92,7 @@ const Properties: React.FC = () => {
     if (properties.length > 0) {
       applyFilters();
     }
-  }, [properties, selectedCategory, selectedLocation, selectedZone]);
+  }, [properties, selectedType, selectedCategory, selectedLocation, selectedZone]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -187,14 +197,50 @@ const Properties: React.FC = () => {
           onSubmit={handleSubmit}
           className="bg-white rounded-sm shadow-xl p-6 mb-10 border border-gray-100"
         >
-          <div className="flex flex-col md:flex-row items-end gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 items-end gap-5">
+            {/* Negotiation Type Filter */}
+            <div>
+              <label
+                htmlFor="filter-type"
+                className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
+              >
+                Finalidade
+              </label>
+              <div className="relative">
+                <Tag
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gold-dark pointer-events-none"
+                  size={18}
+                  aria-hidden="true"
+                />
+                <select
+                  id="filter-type"
+                  name="type"
+                  value={selectedType}
+                  onChange={(e) => setSelectedType(e.target.value)}
+                  className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
+                >
+                  <option value="Todos">Todos</option>
+                  {options.types.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
+                  size={16}
+                  aria-hidden="true"
+                />
+              </div>
+            </div>
+
             {/* Category Filter */}
-            <div className="w-full md:w-1/4">
+            <div>
               <label
                 htmlFor="filter-category"
                 className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
               >
-                Pretensão / Tipo
+                Categoria
               </label>
               <div className="relative">
                 <Building
@@ -210,9 +256,11 @@ const Properties: React.FC = () => {
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
                   <option value="Todos">Todos</option>
-                  <option value="Apartamento">Apartamento</option>
-                  <option value="Casa">Casa</option>
-                  <option value="Terreno">Terreno</option>
+                  {options.categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
@@ -223,7 +271,7 @@ const Properties: React.FC = () => {
             </div>
 
             {/* Zone Filter */}
-            <div className="w-full md:w-1/4">
+            <div>
               <label
                 htmlFor="filter-zone"
                 className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
@@ -244,14 +292,11 @@ const Properties: React.FC = () => {
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
                   <option value="Todas">Selecione a Zona</option>
-                  <option value="Zona Oeste">Zona Oeste</option>
-                  <option value="Zona Norte">Zona Norte</option>
-                  <option value="Zona Sul">Zona Sul</option>
-                  <option value="Zona Portuária">Zona Portuária</option>
-                  <option value="Porto Maravilha">Porto Maravilha</option>
-                  <option value="Zona Sudoeste">Zona Sudoeste</option>
-                  <option value="Centro">Centro</option>
-                  <option value="Niterói">Niterói</option>
+                  {options.zones.map((z) => (
+                    <option key={z} value={z}>
+                      {z}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
@@ -262,7 +307,7 @@ const Properties: React.FC = () => {
             </div>
 
             {/* Neighborhood Filter */}
-            <div className="w-full md:w-1/4">
+            <div>
               <label
                 htmlFor="filter-location"
                 className="text-xs text-gold-dark font-bold uppercase tracking-widest block mb-2"
@@ -283,22 +328,11 @@ const Properties: React.FC = () => {
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
                 >
                   <option value="Todos os Bairros">Todos os Bairros</option>
-                  <option value="Bangu">Bangu</option>
-                  <option value="Barra da Tijuca">Barra da Tijuca</option>
-                  <option value="Barra Olímpica">Barra Olímpica</option>
-                  <option value="Cachambi">Cachambi</option>
-                  <option value="Campo Grande">Campo Grande</option>
-                  <option value="Centro">Centro</option>
-                  <option value="Irajá">Irajá</option>
-                  <option value="Niterói">Niterói</option>
-                  <option value="Olaria">Olaria</option>
-                  <option value="Recreio dos Bandeirantes">Recreio dos Bandeirantes</option>
-                  <option value="Rio Comprido">Rio Comprido</option>
-                  <option value="Santa Cruz">Santa Cruz</option>
-                  <option value="Santo Cristo">Santo Cristo</option>
-                  <option value="São Cristóvão">São Cristóvão</option>
-                  <option value="Taquara">Taquara</option>
-                  <option value="Zona Portuária e Centro">Zona Portuária e Centro</option>
+                  {options.locations.map((loc) => (
+                    <option key={loc} value={loc}>
+                      {loc}
+                    </option>
+                  ))}
                 </select>
                 <ChevronDown
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
@@ -309,13 +343,13 @@ const Properties: React.FC = () => {
             </div>
 
             {/* Search Button */}
-            <div className="w-full md:w-1/4">
+            <div>
               <button
                 type="submit"
                 className="w-full bg-navy hover:bg-navy/90 text-white font-bold py-3 rounded-sm flex items-center justify-center gap-2 transition-all shadow-lg transform hover:-translate-y-0.5 active:translate-y-0"
               >
-                <Search size={20} aria-hidden="true" />
-                <span className="uppercase text-sm tracking-widest">Buscar Imóvel</span>
+                <Search size={18} aria-hidden="true" />
+                <span className="uppercase text-xs tracking-widest">Buscar Imóvel</span>
               </button>
             </div>
           </div>
@@ -390,6 +424,7 @@ const Properties: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
+                    setSelectedType('Todos');
                     setSelectedCategory('Todos');
                     setSelectedZone('Todas');
                     setSelectedLocation('Todos os Bairros');

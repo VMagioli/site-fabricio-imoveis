@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, MapPin, Building, ChevronDown, Map } from 'lucide-react';
+import { usePropertyOptions } from '../src/hooks/usePropertyOptions';
 
 const QuickSearch: React.FC = () => {
   const navigate = useNavigate();
+  const options = usePropertyOptions();
   const [category, setCategory] = useState('Todos');
   const [zone, setZone] = useState('Todas');
   const [location, setLocation] = useState('Todos os Bairros');
@@ -45,9 +47,11 @@ const QuickSearch: React.FC = () => {
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
               <option value="Todos">Todos</option>
-              <option value="Apartamento">Apartamento</option>
-              <option value="Casa">Casa</option>
-              <option value="Terreno">Terreno</option>
+              {options.categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
             </select>
             <ChevronDown
               className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
@@ -79,13 +83,11 @@ const QuickSearch: React.FC = () => {
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
               <option value="Todas">Selecione a Zona</option>
-              <option value="Zona Oeste">Zona Oeste</option>
-              <option value="Zona Norte">Zona Norte</option>
-              <option value="Zona Sudoeste">Zona Sudoeste</option>
-              <option value="Zona Sul">Zona Sul</option>
-              <option value="Porto Maravilha">Porto Maravilha</option>
-              <option value="Centro">Centro</option>
-              <option value="Niterói">Niterói</option>
+              {options.zones.map((z) => (
+                <option key={z} value={z}>
+                  {z}
+                </option>
+              ))}
             </select>
             <ChevronDown
               className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
@@ -117,21 +119,11 @@ const QuickSearch: React.FC = () => {
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
             >
               <option value="Todos os Bairros">Todos os Bairros</option>
-              <option value="Bangu">Bangu</option>
-              <option value="Barra da Tijuca">Barra da Tijuca</option>
-              <option value="Barra Olímpica">Barra Olímpica</option>
-              <option value="Cachambi">Cachambi</option>
-              <option value="Campo Grande">Campo Grande</option>
-              <option value="Centro">Centro</option>
-              <option value="Irajá">Irajá</option>
-              <option value="Niterói">Niterói</option>
-              <option value="Olaria">Olaria</option>
-              <option value="Recreio dos Bandeirantes">Recreio dos Bandeirantes</option>
-              <option value="Rio Comprido">Rio Comprido</option>
-              <option value="Santa Cruz">Santa Cruz</option>
-              <option value="Santo Cristo">Santo Cristo</option>
-              <option value="São Cristóvão">São Cristóvão</option>
-              <option value="Taquara">Taquara</option>
+              {options.locations.map((loc) => (
+                <option key={loc} value={loc}>
+                  {loc}
+                </option>
+              ))}
             </select>
             <ChevronDown
               className="absolute right-3 top-1/2 -translate-y-1/2 text-dark/60 pointer-events-none"
