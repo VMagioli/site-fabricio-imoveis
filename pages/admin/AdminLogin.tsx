@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowLeft, Loader2 } from 'lucide-react';
-import { supabase } from '../../src/lib/supabase';
+import {
+  clearAdminBrowserSession,
+  markAdminBrowserSession,
+  supabase,
+} from '../../src/lib/supabase';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 const MAX_ATTEMPTS = 5;
@@ -55,12 +59,15 @@ const AdminLogin: React.FC = () => {
 
     setSubmitting(true);
     try {
+      // Marca o cookie volátil antes do signInWithPassword para evitar corrida com onAuthStateChange
+      markAdminBrowserSession();
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
 
       if (error) {
+        clearAdminBrowserSession();
         const nextAttempts = failedAttempts + 1;
         setFailedAttempts(nextAttempts);
         if (nextAttempts >= MAX_ATTEMPTS) {
@@ -87,6 +94,7 @@ const AdminLogin: React.FC = () => {
         }
       }
 
+      markAdminBrowserSession();
       await refreshAuth();
       navigate('/gestao', { replace: true });
     } catch {
@@ -140,6 +148,7 @@ const AdminLogin: React.FC = () => {
         return;
       }
 
+      markAdminBrowserSession();
       await refreshAuth();
       navigate('/gestao', { replace: true });
     } catch {
@@ -257,6 +266,10 @@ const AdminLogin: React.FC = () => {
                 'Entrar no Painel'
               )}
             </button>
+
+            <p className="text-[11px] text-gray-600 text-center leading-relaxed">
+              Por segurança, sua sessão fica restrita a esta guia e é encerrada automaticamente ao fechar a guia ou o navegador.
+            </p>
           </form>
         ) : (
           <form onSubmit={handleMfaSubmit} className="space-y-5" noValidate>
