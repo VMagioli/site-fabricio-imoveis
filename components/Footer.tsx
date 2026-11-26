@@ -160,7 +160,13 @@ const Footer: React.FC = () => {
             <p className="text-sm text-pearl/85 mb-6 font-light">
               Receba lançamentos e oportunidades off-market.
             </p>
-            <form onSubmit={handleSubscribe} aria-label="Cadastro na newsletter" noValidate>
+            <form
+              onSubmit={handleSubscribe}
+              aria-label="Cadastro na newsletter"
+              toolname="assinar_newsletter_imoveis"
+              tooldescription="Cadastra um endereço de e-mail para receber lançamentos e oportunidades imobiliárias de Fabrício Magioli no Rio de Janeiro."
+              noValidate
+            >
               <div className="flex">
                 <label htmlFor="newsletter-email" className="sr-only">
                   Seu melhor e-mail
@@ -171,6 +177,7 @@ const Footer: React.FC = () => {
                   type="email"
                   autoComplete="email"
                   required
+                  toolparamdescription="Endereço de e-mail válido do usuário para receber novidades e lançamentos imobiliários."
                   placeholder="Seu melhor e-mail"
                   className="bg-white/10 border border-white/25 py-3 px-4 rounded-l-sm w-full text-white placeholder:text-pearl/70 outline-none focus:border-gold transition-colors text-sm disabled:opacity-50"
                   value={email}

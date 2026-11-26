@@ -38,6 +38,9 @@ const QuickSearch: React.FC = () => {
       <form
         role="search"
         aria-label="Busca rápida de imóveis"
+        toolname="buscar_imoveis_rj"
+        tooldescription="Busca rápida de imóveis disponíveis no Rio de Janeiro por categoria, zona e bairro, redirecionando para o catálogo filtrado."
+        toolautosubmit=""
         onSubmit={handleSearch}
         className="bg-white rounded-sm shadow-2xl p-4 md:p-8 flex flex-col md:flex-row items-center gap-6"
       >
@@ -58,6 +61,7 @@ const QuickSearch: React.FC = () => {
             <select
               id="quick-category"
               name="category"
+              toolparamdescription="Categoria do imóvel desejado (ex.: Apartamento, Casa, Cobertura, Terreno ou Todos)."
               value={category}
               onChange={(e) => setCategory(e.target.value)}
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
@@ -94,6 +98,7 @@ const QuickSearch: React.FC = () => {
             <select
               id="quick-zone"
               name="zone"
+              toolparamdescription="Zona ou região do Rio de Janeiro (ex.: Zona Oeste, Zona Norte, Zona Sul, Zona Sudoeste, Centro, Niterói ou Todas)."
               value={zone}
               onChange={(e) => handleZoneChange(e.target.value)}
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
@@ -130,6 +135,7 @@ const QuickSearch: React.FC = () => {
             <select
               id="quick-location"
               name="location"
+              toolparamdescription="Bairro específico compatível com a zona selecionada (ex.: Campo Grande, Bangu, Recreio dos Bandeirantes ou Todos os Bairros)."
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"

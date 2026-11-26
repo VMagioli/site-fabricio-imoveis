@@ -324,6 +324,9 @@ const Properties: React.FC = () => {
         <form
           role="search"
           aria-label="Filtrar catálogo de imóveis"
+          toolname="filtrar_catalogo_imoveis"
+          tooldescription="Filtra o catálogo completo de imóveis no Rio de Janeiro por finalidade (comprar, alugar, vender), categoria, zona e bairro."
+          toolautosubmit=""
           onSubmit={handleSubmit}
           className="bg-white rounded-sm shadow-xl p-6 mb-10 border border-gray-100"
         >
@@ -345,6 +348,7 @@ const Properties: React.FC = () => {
                 <select
                   id="filter-type"
                   name="type"
+                  toolparamdescription="Finalidade da negociação (ex.: Comprar, Alugar, Vender ou Todos)."
                   value={selectedType}
                   onChange={(e) => handleTypeChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
@@ -381,6 +385,7 @@ const Properties: React.FC = () => {
                 <select
                   id="filter-category"
                   name="category"
+                  toolparamdescription="Categoria do imóvel (ex.: Apartamento, Casa, Cobertura, Terreno ou Todos)."
                   value={selectedCategory}
                   onChange={(e) => handleCategoryChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
@@ -417,6 +422,7 @@ const Properties: React.FC = () => {
                 <select
                   id="filter-zone"
                   name="zone"
+                  toolparamdescription="Zona ou região do Rio de Janeiro (ex.: Zona Oeste, Zona Norte, Zona Sul, Centro, Niterói ou Todas)."
                   value={selectedZone}
                   onChange={(e) => handleZoneChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"
@@ -453,6 +459,7 @@ const Properties: React.FC = () => {
                 <select
                   id="filter-location"
                   name="location"
+                  toolparamdescription="Bairro compatível com a zona selecionada (ex.: Campo Grande, Bangu, Barra da Tijuca ou Todos os Bairros)."
                   value={selectedLocation}
                   onChange={(e) => handleLocationChange(e.target.value)}
                   className="w-full bg-pearl border border-gray-200 py-3 pl-10 pr-8 rounded-sm text-dark font-medium appearance-none focus:ring-2 focus:ring-gold-dark outline-none cursor-pointer"

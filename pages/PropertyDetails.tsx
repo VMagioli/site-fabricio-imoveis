@@ -599,7 +599,13 @@ const PropertyDetails: React.FC = () => {
                 <h2 className="font-serif text-2xl text-navy">Agende uma Visita</h2>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-5" aria-label="Formulário de agendamento de visita">
+              <form
+                onSubmit={handleSubmit}
+                className="space-y-5"
+                aria-label="Formulário de agendamento de visita"
+                toolname="agendar_visita_imovel"
+                tooldescription={`Registra o interesse do cliente e agenda uma visita com o corretor Fabrício Magioli para o imóvel ${property.title} em ${property.location}.`}
+              >
                 <div>
                   <label
                     htmlFor="visit-name"
@@ -611,7 +617,9 @@ const PropertyDetails: React.FC = () => {
                     id="visit-name"
                     type="text"
                     name="name"
+                    required
                     autoComplete="name"
+                    toolparamdescription="Nome completo do interessado em agendar a visita (mínimo 3 caracteres)."
                     value={formData.name}
                     onChange={handleInputChange}
                     className={`w-full bg-pearl/50 border p-3 text-sm focus:outline-none transition-colors rounded-sm ${
@@ -637,7 +645,9 @@ const PropertyDetails: React.FC = () => {
                     id="visit-contact"
                     type="text"
                     name="contact"
+                    required
                     autoComplete="tel"
+                    toolparamdescription="Telefone com DDD (WhatsApp) ou endereço de e-mail para retorno (mínimo 10 caracteres)."
                     value={formData.contact}
                     onChange={handleInputChange}
                     className={`w-full bg-pearl/50 border p-3 text-sm focus:outline-none transition-colors rounded-sm ${
@@ -664,6 +674,7 @@ const PropertyDetails: React.FC = () => {
                   <textarea
                     id="visit-message"
                     name="message"
+                    toolparamdescription="Dúvidas específicas, melhor dia/horário para visita ou informações sobre financiamento (opcional)."
                     value={formData.message}
                     onChange={handleInputChange}
                     className="w-full bg-pearl/50 border border-gray-300 p-3 text-sm focus:outline-none focus:border-gold-dark transition-colors rounded-sm h-32 resize-none"

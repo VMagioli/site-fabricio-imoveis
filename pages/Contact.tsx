@@ -69,7 +69,13 @@ const Contact: React.FC = () => {
       <div className="grid md:grid-cols-2 gap-12">
         <div className="bg-white p-8 shadow-lg rounded-sm border border-gray-100">
           <h2 className="text-2xl font-serif text-navy mb-6">Fale Conosco</h2>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" aria-label="Formulário de contato">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+            aria-label="Formulário de contato"
+            toolname="enviar_contato_corretor"
+            tooldescription="Prepara e envia uma mensagem de atendimento imobiliário via WhatsApp para o corretor Fabrício Magioli no Rio de Janeiro."
+          >
             <div>
               <label
                 htmlFor="contact-name"
@@ -81,7 +87,9 @@ const Contact: React.FC = () => {
                 id="contact-name"
                 {...register('name', { required: 'Nome é obrigatório' })}
                 type="text"
+                required
                 autoComplete="name"
+                toolparamdescription="Nome completo do cliente interessado."
                 className={`w-full border-b py-2 focus:outline-none transition-colors bg-transparent ${
                   errors.name ? 'border-red-600' : 'border-gray-400 focus:border-gold-dark'
                 }`}
@@ -104,7 +112,9 @@ const Contact: React.FC = () => {
                 id="contact-phone"
                 {...register('phone', { required: 'Telefone é obrigatório' })}
                 type="tel"
+                required
                 autoComplete="tel"
+                toolparamdescription="Telefone com DDD para contato ou WhatsApp (mínimo 10 dígitos)."
                 className={`w-full border-b py-2 focus:outline-none transition-colors bg-transparent ${
                   errors.phone ? 'border-red-600' : 'border-gray-400 focus:border-gold-dark'
                 }`}
@@ -126,6 +136,8 @@ const Contact: React.FC = () => {
               <select
                 id="contact-pretension"
                 {...register('pretension', { required: 'Selecione uma opção' })}
+                required
+                toolparamdescription="Tipo de imóvel ou objetivo procurado: Apartamento, Casa, Terreno ou Investimento."
                 className={`w-full border-b py-2 focus:outline-none transition-colors bg-transparent ${
                   errors.pretension ? 'border-red-600' : 'border-gray-400 focus:border-gold-dark'
                 }`}
@@ -152,6 +164,7 @@ const Contact: React.FC = () => {
               <textarea
                 id="contact-message"
                 {...register('message')}
+                toolparamdescription="Detalhes sobre o imóvel desejado, bairro de interesse, faixa de renda ou dúvidas (opcional)."
                 className={`w-full border-b py-2 focus:outline-none transition-colors bg-transparent h-32 resize-none ${
                   errors.message ? 'border-red-600' : 'border-gray-400 focus:border-gold-dark'
                 }`}
