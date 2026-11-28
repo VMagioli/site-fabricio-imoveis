@@ -118,12 +118,28 @@ export async function uploadPropertyImage(file: File): Promise<UploadedImageResu
   };
 }
 
+async function hasValidMp4MagicBytes(file: File): Promise<boolean> {
+  const headerBuffer = await file.slice(0, 12).arrayBuffer();
+  const bytes = new Uint8Array(headerBuffer);
+  // Cabeçalho ISO Base Media / MP4 contém 'ftyp' nos bytes 4..7 (0x66 0x74 0x79 0x70)
+  return (
+    bytes.length >= 8 &&
+    bytes[4] === 0x66 &&
+    bytes[5] === 0x74 &&
+    bytes[6] === 0x79 &&
+    bytes[7] === 0x70
+  );
+}
+
 export async function uploadPropertyVideo(file: File): Promise<string> {
   if (!ALLOWED_VIDEO_TYPES.includes(file.type)) {
     throw new Error('Formato de vídeo não suportado. Envie arquivos MP4.');
   }
   if (file.size > MAX_VIDEO_BYTES) {
     throw new Error('Vídeo excede o limite de 30 MB.');
+  }
+  if (!(await hasValidMp4MagicBytes(file))) {
+    throw new Error('Arquivo inválido: o conteúdo não corresponde a um vídeo MP4 válido.');
   }
 
   const fileId = typeof crypto !== 'undefined' && crypto.randomUUID

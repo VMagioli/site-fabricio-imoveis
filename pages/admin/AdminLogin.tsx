@@ -28,6 +28,8 @@ const AdminLogin: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number>(0);
+  const [mfaFailedAttempts, setMfaFailedAttempts] = useState(0);
+  const [mfaLockedUntil, setMfaLockedUntil] = useState<number>(0);
 
   useEffect(() => {
     if (!loading && session && isAdmin && !needsMfa) {
@@ -108,6 +110,13 @@ const AdminLogin: React.FC = () => {
     e.preventDefault();
     setErrorMessage('');
 
+    const now = Date.now();
+    if (mfaLockedUntil > now) {
+      const remaining = Math.ceil((mfaLockedUntil - now) / 1000);
+      setErrorMessage(`Muitas tentativas de 2FA. Aguarde ${remaining}s para tentar novamente.`);
+      return;
+    }
+
     const cleanCode = mfaCode.replace(/\D/g, '');
     if (cleanCode.length !== 6) {
       setErrorMessage('Digite o código de 6 dígitos do aplicativo autenticador.');
@@ -144,10 +153,19 @@ const AdminLogin: React.FC = () => {
       });
 
       if (verifyErr) {
-        setErrorMessage('Código inválido ou expirado. Confira no Google Authenticator.');
+        const nextMfaAttempts = mfaFailedAttempts + 1;
+        setMfaFailedAttempts(nextMfaAttempts);
+        if (nextMfaAttempts >= MAX_ATTEMPTS) {
+          setMfaLockedUntil(Date.now() + LOCKOUT_MS);
+          setMfaFailedAttempts(0);
+          setErrorMessage('Muitas tentativas de código 2FA inválidas. Aguarde 60 segundos.');
+        } else {
+          setErrorMessage('Código inválido ou expirado. Confira no Google Authenticator.');
+        }
         return;
       }
 
+      setMfaFailedAttempts(0);
       markAdminBrowserSession();
       await refreshAuth();
       navigate('/gestao', { replace: true });
